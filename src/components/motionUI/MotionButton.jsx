@@ -1,12 +1,12 @@
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { buttonMotion } from "@/assets/motionConfig/buttonMotion";
+import { buttonConfig } from "@/assets/motionConfig/buttonConfig";
 
 const AnimatedButton = motion.create(Button);
 
 function MotionButton({ children, ...props }) {
   return (
-    <AnimatedButton {...buttonMotion} {...props}>
+    <AnimatedButton {...buttonConfig} {...props}>
       {children}
     </AnimatedButton>
   );

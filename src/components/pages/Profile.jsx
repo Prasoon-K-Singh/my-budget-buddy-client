@@ -1,11 +1,11 @@
-import Topbar from "@/components/common/Topbar";
+import BaseLayout from "@/components/common/BaseLayout";
 
 const Profile = () => {
   return (
-    <div>
-      <Topbar />
-      <h1>Profile</h1>
-    </div>
+    <BaseLayout
+      title="Profile"
+      description="Manage your personal details and account preferences."
+    ></BaseLayout>
   );
 };
 

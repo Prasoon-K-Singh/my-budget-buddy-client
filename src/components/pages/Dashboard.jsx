@@ -1,11 +1,15 @@
-import Topbar from "@/components/common/Topbar";
+import BaseLayout from "@/components/common/BaseLayout";
 
 const Dashboard = () => {
   return (
-    <div>
-      <Topbar />
-      <h1>Dashboard</h1>
-    </div>
+    <BaseLayout
+      title="Dashboard"
+      description="Get a clear view of your finances with insights and analytics."
+    >
+      <div className="min-h-140 flex justify-center items-center">
+        <h1 className="text-bold text-xl">Analytics Cooming Soon...</h1>
+      </div>
+    </BaseLayout>
   );
 };
 export default Dashboard;

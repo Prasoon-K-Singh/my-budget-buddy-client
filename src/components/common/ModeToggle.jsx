@@ -1,12 +1,13 @@
 import { Moon, Sun, Monitor, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import MotionButton from "@/components/motionUI/MotionButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/components/common/theme-provider";
+import { useTheme } from "@/context/themeContext";
+import { DropdownButtonConfig } from "@/assets/motionConfig/buttonConfig";
 
 const themes = [
   { value: "light", label: "Light", icon: Sun },
@@ -14,7 +15,7 @@ const themes = [
   { value: "system", label: "System", icon: Monitor },
 ];
 
-export function ModeToggle() {
+export function ModeToggle({ className }) {
   const { theme, setTheme } = useTheme();
 
   const current = themes.find((t) => t.value === theme);
@@ -23,10 +24,15 @@ export function ModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <MotionButton
+          variant="secondary"
+          size="lg"
+          buttonConfig={DropdownButtonConfig}
+          className={className}
+        >
           <Icon className="h-4 w-4" />
           <span>{current?.label}</span>
-        </Button>
+        </MotionButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {themes.map(({ value, label, icon: ItemIcon }) => (

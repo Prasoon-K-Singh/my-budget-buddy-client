@@ -9,29 +9,32 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import MotionButton from "@/components/motionUI/MotionButton";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 function SignUp() {
-  const [firstname, setFirstname] = useState("");
-  const [lastname, setLastname] = useState("");
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confPassword, setConfPassword] = useState("");
   const { handleRegister } = useAuth();
-  const handleSubmit = () => {
+  const {
+    register,
+    getValues,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    mode: "onChange",
+  });
+  const handleUserRegistration = async (data) => {
     const signupInfo = {
       name: {
-        firstname: firstname,
-        lastname: lastname,
+        firstname: data.firstname,
+        lastname: data.lastname,
       },
-      email: email,
-      username: username,
-      password: password,
+      email: data.email,
+      username: data.username,
+      password: data.password,
     };
-    handleRegister(signupInfo);
+    await handleRegister(signupInfo);
   };
   return (
     <Card className="w-full max-w-sm">
@@ -41,31 +44,39 @@ function SignUp() {
           Enter your details below to start your journey with us
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form>
+      <form onSubmit={handleSubmit(handleUserRegistration)}>
+        <CardContent>
           <div className="flex flex-col gap-6">
             <div className="flex gap-2">
-              <div className="grid gap-2">
+              <div className="grid flex-1 gap-2">
                 <Label htmlFor="firstname">First Name</Label>
                 <Input
                   id="firstname"
                   type="text"
-                  required
-                  onChange={(e) => {
-                    setFirstname(e.target.value);
-                  }}
+                  {...register("firstname", {
+                    required: "First name is required",
+                  })}
                 />
+                {errors.firstname && (
+                  <p className="text-sm text-destructive">
+                    {errors.firstname.message}
+                  </p>
+                )}
               </div>
-              <div className="grid gap-2">
+              <div className="grid flex-1 gap-2">
                 <Label htmlFor="lastname">Last Name</Label>
                 <Input
                   id="lastname"
                   type="text"
-                  required
-                  onChange={(e) => {
-                    setLastname(e.target.value);
-                  }}
+                  {...register("lastname", {
+                    required: "Last name is required",
+                  })}
                 />
+                {errors.lastname && (
+                  <p className="text-sm text-destructive">
+                    {errors.lastname.message}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid gap-2">
@@ -73,57 +84,96 @@ function SignUp() {
               <Input
                 id="email"
                 type="email"
-                required
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Enter a valid email address",
+                  },
+                })}
               />
+              {errors.email && (
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 type="text"
-                required
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                }}
+                {...register("username", {
+                  required: "Username is required",
+                  minLength: {
+                    value: 3,
+                    message: "Username must be at least 3 characters",
+                  },
+                  pattern: {
+                    value: /^[a-zA-Z0-9_-]+$/,
+                    message:
+                      "Username can only contain letters, numbers, hyphens (-), and underscores (_)",
+                  },
+                })}
               />
+              {errors.username && (
+                <p className="text-sm text-destructive">
+                  {errors.username.message}
+                </p>
+              )}
             </div>
             <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                required
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                }}
+                {...register("password", {
+                  required: "Password is required",
+                  pattern: {
+                    value:
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/,
+                    message:
+                      "Password must contain at least 8 characters, including uppercase, lowercase, number, and special character",
+                  },
+                })}
               />
+              {errors.password && (
+                <p className="text-sm text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
-              </div>
+            <div className="grid gap-2 pb-4">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
               <Input
                 id="confirm-password"
                 type="password"
-                required
-                onChange={(e) => {
-                  setConfPassword(e.target.value);
-                }}
+                {...register("confirmPassword", {
+                  required: "Please confirm your password",
+                  validate: (value) =>
+                    value === getValues("password") || "Passwords do not match",
+                })}
               />
+              {errors.confirmPassword && (
+                <p className="text-sm text-destructive">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
           </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <MotionButton type="submit" onClick={handleSubmit}>
-          Sign up
-        </MotionButton>
-      </CardFooter>
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <MotionButton type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Spinner /> registering
+              </>
+            ) : (
+              "Sign up"
+            )}
+          </MotionButton>
+        </CardFooter>
+      </form>
     </Card>
   );
 }

@@ -1,4 +1,4 @@
-export const defaultButtonConfig = {
+const DefaultButtonConfig = {
   whileHover: {
     scale: 1.02,
     y: -1,
@@ -14,10 +14,15 @@ export const defaultButtonConfig = {
   },
 };
 
-export const DropdownButtonConfig = {
+const DropdownButtonConfig = {
   whileHover: {},
 
   whileTap: {},
 
   transition: {},
+};
+
+export const buttonConfigs = {
+  default: DefaultButtonConfig,
+  dropdown: DropdownButtonConfig,
 };

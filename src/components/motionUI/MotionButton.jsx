@@ -1,19 +1,20 @@
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { defaultButtonConfig } from "@/assets/motionConfig/buttonConfig";
+import { buttonConfigs } from "@/assets/motionConfig/buttonConfig";
 import { cn } from "@/lib/utils";
 
 const AnimatedButton = motion.create(Button);
 
 function MotionButton({
   children,
-  buttonConfig = defaultButtonConfig,
+  buttonConfig = "default",
   className,
   ...props
 }) {
+  const config = buttonConfigs[buttonConfig] ?? buttonConfigs.default;
   return (
     <AnimatedButton
-      {...buttonConfig}
+      {...config}
       {...props}
       className={cn("cursor-pointer", className)}
     >

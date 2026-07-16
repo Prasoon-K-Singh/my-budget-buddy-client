@@ -90,6 +90,19 @@ const Topbar = () => {
                   Goal Tracker
                 </NavLink>
               </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavLink
+                  to="/profile"
+                  className={({ isActive }) =>
+                    `${navigationMenuTriggerStyle()} ${
+                      isActive ? "bg-accent text-accent-foreground" : ""
+                    }`
+                  }
+                >
+                  Profile
+                </NavLink>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
 
@@ -103,7 +116,7 @@ const Topbar = () => {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem
+              {/* <DropdownMenuItem
                 asChild
                 className="flex items-center justify-between gap-4"
               >
@@ -112,9 +125,9 @@ const Topbar = () => {
                     <UserRound className="h-4 w-4" />
                     Profile
                   </div>
-                  {/* <Check className="h-4 w-4" /> */}
+                  <Check className="h-4 w-4" />
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem
                 onClick={handleLogoutUser}
                 className="cursor-pointer"

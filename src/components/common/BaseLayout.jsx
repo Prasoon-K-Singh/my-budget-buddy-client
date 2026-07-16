@@ -3,7 +3,7 @@ import Topbar from "./Topbar";
 const BaseLayout = ({ children, title, description }) => {
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-10 lg:py-6">
+      <div className="mx-auto w-full max-w-400 px-4 py-4 sm:px-6 lg:px-10 lg:py-6">
         <Topbar />
         <main className="mt-8">
           <section className="rounded-2xl border bg-background p-5 shadow-sm sm:p-6 lg:p-8">

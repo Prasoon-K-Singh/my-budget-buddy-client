@@ -7,7 +7,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/context/themeContext";
-import { DropdownButtonConfig } from "@/assets/motionConfig/buttonConfig";
 
 const themes = [
   { value: "light", label: "Light", icon: Sun },
@@ -27,7 +26,7 @@ export function ModeToggle({ className }) {
         <MotionButton
           variant="secondary"
           size="lg"
-          buttonConfig={DropdownButtonConfig}
+          buttonConfig="dropdown"
           className={className}
         >
           <Icon className="h-4 w-4" />

@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/context/themeContext";
+import { cn } from "@/lib/utils";
 
 const themes = [
   { value: "light", label: "Light", icon: Sun },
@@ -27,10 +28,10 @@ export function ModeToggle({ className }) {
           variant="secondary"
           size="lg"
           buttonConfig="dropdown"
-          className={className}
+          className={cn("rounded-full", className)}
         >
           <Icon className="h-4 w-4" />
-          <span>{current?.label}</span>
+          {/* <span className="hidden lg:block">{current?.label}</span> */}
         </MotionButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

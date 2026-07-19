@@ -19,7 +19,7 @@ const DatePickerWithRange = ({ disabledBeforeDate = oneYearAgo }) => {
     to: today,
   });
   return (
-    <Field className="w-106">
+    <Field className="w-full max-w-106">
       <Popover>
         <PopoverTrigger asChild>
           <MotionButton

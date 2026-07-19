@@ -9,42 +9,30 @@ import { ThemeProvider } from "@/context/themeContext";
 const Homepage = () => {
   const { user, loading } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
-
   if (user) {
     return <Navigate to={"/dashboard"} />;
   }
-
   const handleFormToggle = () => {
     setIsRegister(!isRegister);
   };
   return (
     <ThemeProvider>
-      <div className="min-h-screen grid grid-cols-12 items-center">
-        <div className="col-span-12 lg:col-span-8 flex justify-center text-xl font-bold">
-          My Budget Buddy
-        </div>
-        <div className="col-span-12 lg:col-span-4 flex flex-col justify-center">
-          <ModeToggle className="absolute right-8 top-8" />
+      <div className="bg-muted/60 min-h-screen flex flex-col justify-center items-center gap-8 p-4 pt-20">
+        <div className="text-4xl font-bold">My Budget Buddy</div>
+        <ModeToggle className="absolute right-8 top-8" />
+        <div className="flex flex-col gap-4">
           {isRegister ? <SignUp /> : <LogIn />}
           {isRegister ? (
             <div>
               <span>Already have account</span>
-              <MotionButton
-                variant="link"
-                className="cursor-pointer"
-                onClick={handleFormToggle}
-              >
+              <MotionButton variant="link" onClick={handleFormToggle}>
                 Login
               </MotionButton>
             </div>
           ) : (
             <div>
               <span>Register here</span>
-              <MotionButton
-                variant="link"
-                className="cursor-pointer"
-                onClick={handleFormToggle}
-              >
+              <MotionButton variant="link" onClick={handleFormToggle}>
                 Sign up
               </MotionButton>
             </div>

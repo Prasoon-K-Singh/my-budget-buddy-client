@@ -85,9 +85,9 @@ const Dashboard = () => {
       title="Dashboard"
       description="Get a clear view of your finances with insights and analytics."
     >
-      <div className="grid grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {Array.from({ length: 4 }).map((_, index) => (
-          <CardLayout>
+          <CardLayout key={index}>
             <Item className="flex flex-col items-start gap-4 p-5">
               <ItemTitle className="text-muted-foreground text-lg">
                 Total Balance
@@ -103,37 +103,29 @@ const Dashboard = () => {
           </CardLayout>
         ))}
       </div>
-      <div className="grid grid-cols-5 gap-8 my-8">
+      <div className="flex flex-col xl:grid xl:grid-cols-5 gap-8 my-8">
         <CardLayout className="col-span-3">
-          <div className="py-6.5 px-7">
-            <FieldTitle className="text-xl font-bold">
+          <div className="py-2 px-2 md:py-6.5 md:px-7">
+            <FieldTitle className="text:lg lg:text-xl font-bold">
               Spending Overview
             </FieldTitle>
           </div>
-          <div className="flex flex-row h-[80%] px-7 gap-8">
-            <div className="relative h-full w-[40%]">
+          <div className="flex flex-col md:flex-row h-full min-h-75 xl:h-[80%] px-2 md:px-7 gap-8">
+            <div className="relative max-md:h-75 w-full min-w-60 md:w-[40%] md:min-w-75">
               <ChartContainer config={chartConfig} className="h-full w-full">
                 <PieChart>
-                  {/* <ChartTooltip /> */}
                   <ChartTooltip
                     cursor={false}
                     content={
-                      <ChartTooltipContent
-                        // formatter={(value, name) => [
-                        //   name,
-                        //   formatCurrency(value),
-                        // ]}
-                        indicator="dot"
-                        hideLabel={false}
-                      />
+                      <ChartTooltipContent indicator="dot" hideLabel={false} />
                     }
                   />
                   <Pie
                     data={chartData}
                     dataKey="value"
                     nameKey="category"
-                    innerRadius={100}
-                    outerRadius={140}
+                    innerRadius={80}
+                    outerRadius={120}
                   />
                 </PieChart>
               </ChartContainer>
@@ -145,8 +137,8 @@ const Dashboard = () => {
             <ItemGroup className="flex flex-1 p-0 gap-0 my-auto">
               {Array.from({ length: 6 }).map((_, index) => (
                 <Item key={index}>
-                  <ItemContent className="flex flex-row justify-between">
-                    <ItemTitle>
+                  <ItemContent className="flex flex-row justify-between items-start">
+                    <ItemTitle className="max-lg:max-w-30">
                       <CircleSmall
                         color="hsl(199 89% 48%)"
                         fill="hsl(199 89% 48%)"
@@ -163,10 +155,10 @@ const Dashboard = () => {
           </div>
         </CardLayout>
         <CardLayout className="col-span-2">
-          <ItemGroup className="p-4">
+          <ItemGroup className="p-1 md:p-4">
             <Item className="pb-4.5">
               <ItemHeader>
-                <ItemTitle className="text-xl font-bold">
+                <ItemTitle className="text:lg lg:text-xl font-bold">
                   Recent transaction
                 </ItemTitle>
                 <ItemActions>
@@ -177,23 +169,23 @@ const Dashboard = () => {
               </ItemHeader>
             </Item>
             {Array.from({ length: 5 }).map((_, index) => (
-              <Item key={index} className="py-0">
+              <Item key={index} className="px-1 py-0 md:px-3">
                 <ItemContent className="flex flex-row gap-4">
                   {/* make it as common ui */}
-                  <div className="w-12 h-12 flex justify-between items-center bg-chart-1/30 rounded-full">
-                    <span className="flex-1 text-3xl text-center font-bold">
+                  <div className="w-8 h-8 md:w-12 md:h-12 flex justify-between items-center bg-chart-1/30 rounded-full">
+                    <span className="flex-1 text-2xl md:text-3xl text-center font-bold">
                       Z
                     </span>
                   </div>
                   <ItemContent className="gap-0">
-                    <ItemTitle className="text-lg font-semibold">
+                    <ItemTitle className="text:md lg:text-lg font-semibold">
                       Zomato
                     </ItemTitle>
                     <ItemDescription>Food & Dining</ItemDescription>
                   </ItemContent>
                 </ItemContent>
                 <ItemContent className="gap-0">
-                  <ItemTitle className="text-lg font-semibold text-destructive">
+                  <ItemTitle className="text:md lg:text-lg font-semibold text-destructive">
                     {formatCurrency(-500, "INR")}
                   </ItemTitle>
                   <ItemDescription>May 11 2026</ItemDescription>
@@ -203,7 +195,7 @@ const Dashboard = () => {
           </ItemGroup>
         </CardLayout>
       </div>
-      <div className="grid grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <CardLayout>
           <CardContent className="flex flex-row gap-6 px-6 py-2">
             <div className="w-12 h-12 min-w-12 min-h-12 rounded-md bg-success/15 flex justify-center items-center">
@@ -211,9 +203,11 @@ const Dashboard = () => {
             </div>
             <Field>
               <FieldContent className="h-full justify-between gap-3">
-                <FieldLabel className="text-xl font-bold">Budget</FieldLabel>
+                <FieldLabel className="text:lg lg:text-xl font-bold">
+                  Budget
+                </FieldLabel>
                 <FieldTitle className="text-muted-foreground pt-1">
-                  3 Over Budget
+                  3 Over Budget this month
                 </FieldTitle>
                 <div>
                   <MotionButton variant="outline" size="lg">
@@ -232,9 +226,11 @@ const Dashboard = () => {
             </div>
             <Field>
               <FieldContent className="h-full justify-between gap-3">
-                <FieldLabel className="text-xl font-bold">Goals</FieldLabel>
+                <FieldLabel className="text:lg lg:text-xl font-bold">
+                  Goals
+                </FieldLabel>
                 <FieldTitle className="text-muted-foreground pt-1">
-                  2 Goals in Progress
+                  2 Goals in-Progress
                 </FieldTitle>
                 <div>
                   <MotionButton variant="outline" size="lg">
@@ -253,11 +249,11 @@ const Dashboard = () => {
             </div>
             <Field>
               <FieldContent className="h-full justify-between gap-3">
-                <FieldLabel className="text-xl font-bold">
-                  Upcoming Bills
+                <FieldLabel className="text:lg lg:text-xl font-bold">
+                  Bills
                 </FieldLabel>
                 <FieldTitle className="text-muted-foreground pt-1">
-                  2 Bills Due
+                  2 upcoming Bills Due
                 </FieldTitle>
                 <div>
                   <MotionButton variant="outline" size="lg">

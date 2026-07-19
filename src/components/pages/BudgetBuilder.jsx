@@ -21,11 +21,11 @@ import { Lightbulb, Plane } from "lucide-react";
 const BudgetBuilder = () => {
   return (
     <BaseLayout title="Budget Planner" description="Plan smarter. Spend wiser.">
-      <div className="grid grid-cols-3 gap-8">
-        <CardLayout className="col-span-1 p-4">
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-8">
+        <CardLayout className="col-span-1 p-0 md:p-4">
           <ItemGroup>
             <Item>
-              <ItemHeader className="text-xl font-bold">
+              <ItemHeader className="text:lg lg:text-xl font-bold">
                 May 2024 Budget
               </ItemHeader>
             </Item>
@@ -62,11 +62,11 @@ const BudgetBuilder = () => {
             </Item>
           </ItemGroup>
         </CardLayout>
-        <CardLayout className="col-span-2 p-4">
+        <CardLayout className="col-span-2 p-0 md:p-4">
           <ItemGroup>
             <Item>
               <ItemHeader>
-                <ItemTitle className="text-xl font-bold">
+                <ItemTitle className="text:lg lg:text-xl font-bold">
                   Category Budget
                 </ItemTitle>
                 <ItemActions>
@@ -80,30 +80,30 @@ const BudgetBuilder = () => {
                 </ItemActions>
               </ItemHeader>
             </Item>
-            <ScrollArea className="h-91 pr-4">
+            <ScrollArea className="lg:h-91 pr-4">
               {Array.from({ length: 7 }).map((_, index) => (
-                <Item>
-                  <Avatar className="w-14 h-14">
+                <Item key={index}>
+                  <Avatar className="w-10 h-10 md:w-14 md:h-14">
                     <AvatarFallback className="bg-blue-500">
-                      <Plane className="h-10 w-10 text-white" />
+                      <Plane className="h-6 w-6 md:w-10 md:h-10 text-white" />
                     </AvatarFallback>
                   </Avatar>
                   <ItemContent className="flex-row items-center">
                     <Field>
                       <FieldLabel>
-                        <span className="flex flex-1 flex-row text-lg">
+                        <span className="flex flex-1 flex-row text-sm md:text-lg">
                           Food
                         </span>
-                        <span className="mr-20">
+                        <span className="hidden md:block mr-20">
                           {formatCurrency(2000, "INR")} of{" "}
                           {formatCurrency(4000, "INR")}
                         </span>
                       </FieldLabel>
-                      <Progress className="h-4" value={50} />
+                      <Progress className="md:h-2" value={50} />
                     </Field>
                   </ItemContent>
                   <ItemContent>
-                    <FieldLabel className="text-2xl">50%</FieldLabel>
+                    <FieldLabel className="text-md md:text-2xl">50%</FieldLabel>
                   </ItemContent>
                 </Item>
               ))}
@@ -111,10 +111,12 @@ const BudgetBuilder = () => {
           </ItemGroup>
         </CardLayout>
       </div>
-      <CardLayout className="mt-8 p-4">
+      <CardLayout className="mt-8 p-0 md:p-4">
         <Item>
           <ItemContent className="gap-0">
-            <ItemTitle className="text-lg font-bold mb-4">Tips</ItemTitle>
+            <ItemTitle className="text-md md:text-lg font-bold mb-4">
+              Tips
+            </ItemTitle>
             <ItemDescription className="mx-2.5">
               You've spent 15% more on Food compared to last month.
             </ItemDescription>

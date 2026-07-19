@@ -30,7 +30,7 @@ function LogIn() {
     await handleLogin(signinInfo);
   };
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full min-w-85 shadow-2xl">
       <CardHeader>
         <CardTitle>Login to your account</CardTitle>
         <CardDescription>

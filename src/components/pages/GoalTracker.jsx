@@ -28,7 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Item,
   ItemContent,
@@ -38,33 +38,59 @@ import {
 import { formatCurrency } from "@/lib/currency";
 const GoalTracker = () => {
   const [loading, setLoading] = useState(false);
+  const [api, setApi] = useState();
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
+  useEffect(() => {
+    if (!api) return;
+
+    const update = () => {
+      setCanScrollPrev(api.canScrollPrev());
+      setCanScrollNext(api.canScrollNext());
+    };
+
+    update();
+
+    api.on("select", update);
+    api.on("reInit", update);
+
+    return () => {
+      api.off("select", update);
+      api.off("reInit", update);
+    };
+  }, [api]);
   return (
     <BaseLayout
       title="Savings Goals"
       description="Save consistently. Achieve confidently."
     >
-      <div className="px-16">
+      <div>
         <Carousel
           opts={{
             align: "start",
             loop: true,
           }}
+          setApi={setApi}
           className="w-full"
         >
           <CarouselContent className="-ml-1">
             {Array.from({ length: 4 }).map((_, index) => (
-              <CarouselItem key={index} className="basis-1/2 pl-1 lg:basis-1/3">
+              <CarouselItem
+                key={index}
+                className="pl-1 basis-full md:basis-1/2 lg:basis-1/3"
+              >
                 <div className="p-1">
-                  <CardLayout className="p-4">
+                  <CardLayout className="p-4 shadow-none">
                     <CardContent className="flex flex-row gap-4 px-0">
-                      <Avatar className="w-14 h-14">
+                      <Avatar className="w-10 h-10 md:w-14 md:h-14">
                         <AvatarFallback className="bg-blue-500">
-                          <Plane className="h-10 w-10 text-white" />
+                          <Plane className="h-6 w-6 md:w-10 md:h-10 text-white" />
                         </AvatarFallback>
                       </Avatar>
                       <Field>
-                        <FieldContent className="h-full justify-between">
-                          <FieldLabel className="text-xl font-bold">
+                        <FieldContent className="h-full justify-between gap-2">
+                          <FieldLabel className="text:lg lg:text-xl font-bold">
                             Goa Trip
                           </FieldLabel>
                           <Badge>Travel</Badge>
@@ -112,13 +138,19 @@ const GoalTracker = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          {/* <CarouselPrevious className="-left-3" />
+          <CarouselNext className="-right-3" /> */}
+          <div className="flex justify-center gap-2 mt-4">
+            {canScrollPrev && <CarouselPrevious className="relative" />}
+            {canScrollNext && <CarouselNext className="relative" />}
+          </div>
         </Carousel>
       </div>
-      <CardLayout className="mx-16 mt-8 p-4">
+      <CardLayout className="mt-8 p-4">
         <Field orientation="horizontal">
-          <FieldLabel className="text-xl font-bold">Completed Goals</FieldLabel>
+          <FieldLabel className="text:lg lg:text-xl font-bold">
+            Completed Goals
+          </FieldLabel>
           <MotionButton
             variant="outline"
             size="lg"
@@ -128,18 +160,20 @@ const GoalTracker = () => {
           </MotionButton>
         </Field>
         <CardLayout className="flex flex-col gap-6 mt-4">
-          <Item>
-            <Avatar className="w-14 h-14">
+          <Item className="gap-4">
+            <Avatar className="w-10 h-10 md:w-14 md:h-14 mb-auto">
               <AvatarFallback className="bg-blue-500">
-                <Plane className="h-10 w-10 text-white" />
+                <Plane className="h-6 w-6 md:w-10 md:h-10 text-white" />
               </AvatarFallback>
             </Avatar>
             <ItemContent>
-              <ItemTitle className="text-xl font-bold">iPhone 16</ItemTitle>
+              <ItemTitle className="text:lg lg:text-xl font-bold">
+                iPhone 16
+              </ItemTitle>
               <ItemDescription>Completed on Mar 10, 2026</ItemDescription>
             </ItemContent>
-            <ItemContent>
-              <FieldLabel className="text-success text-lg">
+            <ItemContent className="mt-auto">
+              <FieldLabel className="text-success text:md lg:text-lg">
                 {formatCurrency(80000)}
               </FieldLabel>
             </ItemContent>

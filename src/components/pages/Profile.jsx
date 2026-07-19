@@ -59,9 +59,9 @@ const Profile = () => {
       title="Profile"
       description="Manage your personal details and account preferences."
     >
-      <div className="grid grid-cols-3 gap-4 px-5">
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 md:px-5">
         <div className="col-span-1 flex flex-col items-center">
-          <Avatar className="w-60 h-60 my-8">
+          <Avatar className="w-60 h-60 mt-4 lg:mt-8 mb-8">
             <AvatarFallback>
               <UserRound className="h-45 w-45" />
             </AvatarFallback>
@@ -73,20 +73,20 @@ const Profile = () => {
         <CardLayout className="col-span-2">
           <Field orientation="horizontal" className="p-4">
             <FieldContent>
-              <FieldLabel className="text-xl font-bold">
+              <FieldLabel className="text-lg md:text-xl font-bold">
                 Personal Details
               </FieldLabel>
               <FieldDescription>Manage your details.</FieldDescription>
             </FieldContent>
           </Field>
-          <div className="grid grid-cols-2 gap-x-8 px-4">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-x-8 px-4">
             <Item>
               <ItemContent>
                 <ItemTitle className="pl-2">First Name</ItemTitle>
                 <ItemDescription className="flex flex-row p-1">
                   <Input
                     value={"Prasoon"}
-                    className="w-3/4"
+                    className="max-w-60"
                     disabled={!isEditable}
                   />
                 </ItemDescription>
@@ -98,7 +98,7 @@ const Profile = () => {
                 <ItemDescription className="flex flex-row p-1">
                   <Input
                     value={"Kumar Singh"}
-                    className="w-3/4"
+                    className="max-w-60"
                     disabled={!isEditable}
                   />
                 </ItemDescription>
@@ -110,7 +110,7 @@ const Profile = () => {
                 <ItemDescription className="flex flex-row p-1">
                   <Input
                     value={"prasoon@gmail.com"}
-                    className="w-3/4"
+                    className="max-w-60"
                     disabled={!isEditable}
                   />
                 </ItemDescription>
@@ -122,7 +122,7 @@ const Profile = () => {
                 <ItemDescription className="flex flex-row p-1">
                   <Input
                     value={"prasoon-k-Singh"}
-                    className="w-3/4"
+                    className="max-w-60"
                     disabled={!isEditable}
                   />
                 </ItemDescription>
@@ -134,7 +134,7 @@ const Profile = () => {
                 <ItemDescription className="flex flex-row p-1">
                   <Input
                     value={"Occupation"}
-                    className="w-3/4"
+                    className="max-w-60"
                     disabled={!isEditable}
                   />
                 </ItemDescription>
@@ -143,22 +143,20 @@ const Profile = () => {
             <Item>
               <ItemContent>
                 <ItemTitle className="pl-2">Date of Birth</ItemTitle>
-                {/* <ItemDescription className="flex flex-row p-1"> */}
                 <DateInput
-                  className="w-3/4 p-1"
+                  className="max-w-60 p-1"
                   value={date}
                   onChange={setDate}
                   disabled={!isEditable}
                 />
-                {/* </ItemDescription> */}
               </ItemContent>
             </Item>
             <Item>
               <ItemContent>
                 <ItemTitle className="pl-2">Gender</ItemTitle>
                 <ItemDescription className="flex flex-row p-1">
-                  <Select className="w-3/4" disabled={!isEditable}>
-                    <SelectTrigger className="w-3/4">
+                  <Select className="w-full max-w-60" disabled={!isEditable}>
+                    <SelectTrigger className="w-full max-w-60">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent position="popper">
@@ -176,8 +174,8 @@ const Profile = () => {
               <ItemContent>
                 <ItemTitle className="pl-2">Currency</ItemTitle>
                 <ItemDescription className="flex flex-row p-1">
-                  <Select className="w-3/4" disabled={!isEditable}>
-                    <SelectTrigger className="w-3/4">
+                  <Select className="w-full max-w-60" disabled={!isEditable}>
+                    <SelectTrigger className="w-full max-w-60">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent position="popper">
@@ -228,11 +226,11 @@ const Profile = () => {
           </div>
         </CardLayout>
       </div>
-      <div className="grid grid-cols-2 pt-8 px-5 gap-8">
+      <div className="flex flex-col md:grid md:grid-cols-2 pt-8 md:px-5 gap-8">
         <CardLayout className="col-span-1 p-4">
           <Field orientation="horizontal" className="pb-4">
             <FieldContent>
-              <FieldLabel className="text-xl font-bold">
+              <FieldLabel className="text-lg md:text-xl font-bold">
                 Account Security
               </FieldLabel>
               <FieldDescription>
@@ -241,13 +239,9 @@ const Profile = () => {
             </FieldContent>
           </Field>
           <Dialog>
-            <form>
+            <form className="flex">
               <DialogTrigger asChild>
-                <MotionButton
-                  className="absolute right-4"
-                  variant="outline"
-                  size="lg"
-                >
+                <MotionButton className="ml-auto" variant="outline" size="lg">
                   Change Password
                 </MotionButton>
               </DialogTrigger>
@@ -290,7 +284,9 @@ const Profile = () => {
         <CardLayout className="col-span-1 p-4">
           <Field orientation="horizontal" className="pb-4">
             <FieldContent>
-              <FieldLabel className="text-xl font-bold">Prefrences</FieldLabel>
+              <FieldLabel className="text-lg md:text-xl font-bold">
+                Prefrences
+              </FieldLabel>
               <FieldDescription>Manage your app prefrences.</FieldDescription>
             </FieldContent>
           </Field>
@@ -303,13 +299,6 @@ const Profile = () => {
                 <Switch id="switch-share" />
               </Field>
             </FieldLabel>
-            {/* <MotionButton
-              className="max-w-max mt-2"
-              variant="outline"
-              size="lg"
-            >
-              Update Prefrences
-            </MotionButton> */}
           </FieldGroup>
         </CardLayout>
       </div>

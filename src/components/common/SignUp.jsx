@@ -37,7 +37,7 @@ function SignUp() {
     await handleRegister(signupInfo);
   };
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full min-w-85 shadow-2xl">
       <CardHeader>
         <CardTitle>Welcome to My Budget Buddy</CardTitle>
         <CardDescription>

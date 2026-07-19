@@ -33,7 +33,7 @@ const buttonVariants = cva(
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
         filter:
-          "h-12 gap-10 px-4 text-lg has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+          "h-12 justify-between px-4 text-lg has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
       },
     },
     defaultVariants: {

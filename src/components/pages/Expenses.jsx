@@ -85,8 +85,8 @@ const Expenses = () => {
       title="Expenses"
       description="Monitor your daily spending effortlessly."
     >
-      <div className="flex flex-row gap-4 mb-8">
-        <DropdownMenu>
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-7 gap-4 mb-8">
+        <DropdownMenu className="col-span-1">
           <DropdownMenuTrigger asChild>
             <MotionButton
               variant="secondary"
@@ -103,7 +103,7 @@ const Expenses = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <DropdownMenu>
+        <DropdownMenu className="col-span-1">
           <DropdownMenuTrigger asChild>
             <MotionButton
               variant="secondary"
@@ -120,7 +120,7 @@ const Expenses = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <DropdownMenu>
+        <DropdownMenu className="col-span-1">
           <DropdownMenuTrigger asChild>
             <MotionButton
               variant="secondary"
@@ -137,41 +137,49 @@ const Expenses = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <DatePickerWithRange />
-        <MotionButton variant="outline" size="filter" className="ml-auto">
+        <div className="col-span-1 md:col-span-2">
+          <DatePickerWithRange />
+        </div>
+        <MotionButton
+          variant="outline"
+          size="filter"
+          className="col-span-1 xl:col-start-7"
+        >
           Add Transaction
         </MotionButton>
       </div>
-      <div className="flex flex-row gap-4 mb-8">
-        <CardLayout className="flex flex-1 gap-6 px-4 bg-success/10 border-success/30">
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <CardLayout className="flex flex-1 gap-6 p-0 lg:p-2.5 bg-success/10 border-success/30">
           <Item>
             <ItemContent>
-              <ItemTitle className="text-xl text-success">
+              <ItemTitle className="text-md md:text-xl text-success">
                 Monthly Limit
               </ItemTitle>
-              <ItemDescription className="text-3xl font-bold">
+              <ItemDescription className="text-xl md:text-3xl font-bold">
                 {formatCurrency(78400)}
               </ItemDescription>
             </ItemContent>
           </Item>
         </CardLayout>
-        <CardLayout className="flex flex-1 gap-6 px-4 bg-destructive/10 border-destructive/30">
+        <CardLayout className="flex flex-1 gap-6 p-1 lg:p-2.5 bg-destructive/10 border-destructive/30">
           <Item>
             <ItemContent>
-              <ItemTitle className="text-xl text-destructive">
+              <ItemTitle className="text-md md:text-xl text-destructive">
                 Monthly Expenses
               </ItemTitle>
-              <ItemDescription className="text-3xl font-bold">
+              <ItemDescription className="text-xl md:text-3xl font-bold">
                 {formatCurrency(32720)}
               </ItemDescription>
             </ItemContent>
           </Item>
         </CardLayout>
-        <CardLayout className="flex flex-1 gap-6 px-4 bg-primary/10 border-primary/30">
+        <CardLayout className="flex flex-1 gap-6 p-1 lg:p-2.5 bg-primary/10 border-primary/30">
           <Item>
             <ItemContent>
-              <ItemTitle className="text-xl text-primary">Net Amount</ItemTitle>
-              <ItemDescription className="text-3xl font-bold">
+              <ItemTitle className="text-md md:text-xl text-primary">
+                Net Amount
+              </ItemTitle>
+              <ItemDescription className="text-xl md:text-3xl font-bold">
                 {formatCurrency(45680)}
               </ItemDescription>
             </ItemContent>
@@ -200,7 +208,7 @@ const Expenses = () => {
           ))}
         </TableBody>
       </Table>
-      <Pagination className="py-3.5 bg-muted border rounded-b-lg">
+      <Pagination className="py-3.5 bg-muted border rounded-b-lg shadow-2xl relative z-10">
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious href="#" />

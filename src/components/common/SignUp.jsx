@@ -13,6 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import MotionButton from "@/components/motionUI/MotionButton";
 import { useAuth } from "@/hooks/useAuth";
 import { useForm } from "react-hook-form";
+import PasswordInput from "@/components/common/PasswordInput";
 
 function SignUp() {
   const { handleRegister } = useAuth();
@@ -102,6 +103,7 @@ function SignUp() {
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
+                autoComplete="user_name"
                 type="text"
                 {...register("username", {
                   required: "Username is required",
@@ -124,9 +126,9 @@ function SignUp() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
+                autoComplete="current-password"
                 {...register("password", {
                   required: "Password is required",
                   pattern: {
@@ -145,9 +147,9 @@ function SignUp() {
             </div>
             <div className="grid gap-2 pb-4">
               <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
+              <PasswordInput
                 id="confirm-password"
-                type="password"
+                autoComplete="current-password"
                 {...register("confirmPassword", {
                   required: "Please confirm your password",
                   validate: (value) =>

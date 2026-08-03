@@ -1,3 +1,5 @@
+const backendDomain = "http://localhost:3000/api/";
+
 const navItem = [
   {
     title: "Dashboard",
@@ -21,4 +23,9 @@ const navItem = [
   },
 ];
 
-export { navItem };
+const apiUrl = {
+  authUrl: `${backendDomain}auth`,
+  userUrl: `${backendDomain}user`,
+};
+
+export { navItem, apiUrl };

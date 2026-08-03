@@ -13,6 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import MotionButton from "@/components/motionUI/MotionButton";
 import { useAuth } from "@/hooks/useAuth";
 import { useForm } from "react-hook-form";
+import PasswordInput from "@/components/common/PasswordInput";
 
 function LogIn() {
   const { handleLogin } = useAuth();
@@ -44,6 +45,7 @@ function LogIn() {
               <Label htmlFor="username">Username/Email</Label>
               <Input
                 id="username"
+                autoComplete="username"
                 type="text"
                 {...register("username", {
                   required: "Username or Email is required",
@@ -57,9 +59,9 @@ function LogIn() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
+                autoComplete="current-password"
                 {...register("password", {
                   required: "Password is required",
                   minLength: {

@@ -1,8 +1,8 @@
 const DefaultButtonConfig = {
-  whileHover: {
-    scale: 1.02,
-    y: -1,
-  },
+  // whileHover: {
+  //   scale: 1.02,
+  //   y: -1,
+  // },
 
   whileTap: {
     scale: 0.98,

@@ -1,10 +1,10 @@
 import { useContext } from "react";
 import { AuthContext } from "@/context/authContext";
-import { register, login, logout, getMe } from "@/services/authApi";
+import { register, login, logout } from "@/services/authApi";
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  const { user, setUser, loading, setLoading } = context;
+  const { setUser, setLoading } = context;
 
   const handleRegister = async (payload) => {
     setLoading(true);
@@ -42,5 +42,10 @@ export const useAuth = () => {
     }
   };
 
-  return { user, loading, handleRegister, handleLogin, handleLogout };
+  return {
+    ...context,
+    handleRegister,
+    handleLogin,
+    handleLogout,
+  };
 };

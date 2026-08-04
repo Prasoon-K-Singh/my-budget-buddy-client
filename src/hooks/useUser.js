@@ -1,4 +1,9 @@
-import { userInfo, userUpdate, passwordUpdate } from "@/services/userApi";
+import {
+  userInfo,
+  userUpdate,
+  passwordUpdate,
+  profileImgUpload,
+} from "@/services/userApi";
 import { useState } from "react";
 
 export const useUser = () => {
@@ -36,5 +41,25 @@ export const useUser = () => {
       throw err;
     }
   };
-  return { data, apiError, loading, getUserInfo, updateUser, updatePassword };
+  const uploadProfileImg = async (payload) => {
+    setLoading(true);
+    try {
+      const data = await profileImgUpload(payload);
+      setData(data);
+    } catch (err) {
+      serApiError(err?.response?.data);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+  return {
+    data,
+    apiError,
+    loading,
+    getUserInfo,
+    updateUser,
+    updatePassword,
+    uploadProfileImg,
+  };
 };

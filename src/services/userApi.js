@@ -35,7 +35,16 @@ export async function userUpdate(payload) {
 
 export async function passwordUpdate(payload) {
   try {
-    const response = await api.post("passwordUpdate", payload);
+    const response = await api.post("password-update", payload);
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function profileImgUpload(payload) {
+  try {
+    const response = await api.post("upload-profile", payload);
     return response.data;
   } catch (err) {
     throw err;

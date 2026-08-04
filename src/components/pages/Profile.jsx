@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BaseLayout from "@/components/common/BaseLayout";
 import MotionButton from "@/components/motionUI/MotionButton";
 import CardLayout from "@/components/common/CardLayout";
 import DateInput from "@/components/common/DateInput";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@/hooks/useUser";
 import { Controller, useForm } from "react-hook-form";
@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import PasswordInput from "@/components/common/PasswordInput";
 
 const Profile = () => {
+  const imgUploadInputRef = useRef(null);
   const form = useForm({
     mode: "onChange",
     defaultValues: {
@@ -59,11 +60,20 @@ const Profile = () => {
   const { handleSubmit, control, reset, register } = form;
   const passwordForm = useForm();
 
-  const { data, apiError, loading, getUserInfo, updateUser, updatePassword } =
-    useUser();
+  const {
+    data,
+    apiError,
+    loading,
+    getUserInfo,
+    updateUser,
+    updatePassword,
+    uploadProfileImg,
+  } = useUser();
 
   const [isEditable, setIsEditable] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -107,6 +117,13 @@ const Profile = () => {
         toast.error(apiError.message);
     }
   }, [apiError]);
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleUserUpdate = async (data) => {
     const updatedInfo = {
@@ -143,6 +160,45 @@ const Profile = () => {
       passwordForm.reset();
     }
   };
+  const handleUploadButton = () => {
+    imgUploadInputRef.current?.click();
+  };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    const url = URL.createObjectURL(file);
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image size must be less than 2MB.");
+      return;
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return url;
+    });
+  };
+  const handleUploadCancel = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+  const handleProfileImgSave = async () => {
+    if (!selectedFile) return;
+    try {
+      const formdata = new FormData();
+      formdata.append("profile-img", selectedFile);
+      await uploadProfileImg(formdata);
+      setSelectedFile(null);
+      toast.success("Profile picture updated successfully");
+    } catch (err) {}
+  };
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center gap-4">
@@ -158,13 +214,45 @@ const Profile = () => {
       <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 md:px-5">
         <div className="col-span-1 flex flex-col items-center">
           <Avatar className="w-60 h-60 mt-4 lg:mt-8 mb-8">
+            <AvatarImage src={previewUrl || data?.user?.profileImg} />
             <AvatarFallback>
               <UserRound className="h-45 w-45" />
             </AvatarFallback>
           </Avatar>
-          <MotionButton variant="outline" size="lg">
-            Change Photo
-          </MotionButton>
+          <Input
+            hidden
+            type="file"
+            ref={imgUploadInputRef}
+            onChange={handleFileChange}
+            accept=".png,.jpg,.jpeg,.webp"
+          />
+          <div className="flex gap-4">
+            <MotionButton
+              variant="outline"
+              size="lg"
+              onClick={handleUploadButton}
+            >
+              Change Photo
+            </MotionButton>
+            {selectedFile ? (
+              <>
+                <MotionButton
+                  variant="outline"
+                  size="lg"
+                  onClick={handleProfileImgSave}
+                >
+                  Update
+                </MotionButton>
+                <MotionButton
+                  variant="outline"
+                  size="lg"
+                  onClick={handleUploadCancel}
+                >
+                  Cancel
+                </MotionButton>
+              </>
+            ) : null}
+          </div>
         </div>
         <CardLayout className="col-span-2">
           <Field orientation="horizontal" className="p-4">

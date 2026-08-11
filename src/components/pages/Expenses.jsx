@@ -33,6 +33,37 @@ import {
 import MotionButton from "@/components/motionUI/MotionButton";
 import { ArrowBigDown, ChevronDown } from "lucide-react";
 import DatePickerWithRange from "@/components/common/DatePickerWithRange";
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import DateInput from "@/components/common/DateInput";
+import { Textarea } from "@/components/ui/textarea";
+import { useAcc } from "@/hooks/useAcc";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 const invoices = [
   {
@@ -80,6 +111,51 @@ const invoices = [
 ];
 
 const Expenses = () => {
+  const transacForm = useForm();
+  const AccountForm = useForm();
+  const { register, formState, control, handleSubmit } = transacForm;
+  const {
+    register: accRegister,
+    formState: accFormState,
+    handleSubmit: accHandleSubmit,
+  } = AccountForm;
+  const [transacDailog, setTransacDailog] = useState(false);
+  const [accDailog, setAccDailog] = useState(false);
+  const { handleAdd, loading, apiError, apiData } = useAcc();
+  const trnasType = useWatch({
+    control,
+    name: "trnasType",
+  });
+  const handleAddTransaction = async (data) => {
+    console.log("data: ", data);
+  };
+  const handleAddAccount = async (data) => {
+    const accData = {
+      accName: data.accName,
+      accBalance: Number(data.accAmount),
+      isActive: true,
+    };
+    await handleAdd(accData);
+  };
+  useEffect(() => {
+    if (!apiData) return;
+    if (apiData.success) {
+      toast.success(apiData.message);
+      setAccDailog(false);
+      AccountForm.reset();
+    }
+  }, [apiData]);
+  useEffect(() => {
+    if (!apiError) return;
+    toast.error(apiError.message);
+  }, [apiError]);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center gap-4">
+        <Spinner className="size-8" />
+      </div>
+    );
+  }
   return (
     <BaseLayout
       title="Expenses"
@@ -143,7 +219,20 @@ const Expenses = () => {
         <MotionButton
           variant="outline"
           size="filter"
-          className="col-span-1 xl:col-start-7"
+          className="col-span-1 justify-center"
+          onClick={() => {
+            setAccDailog(true);
+          }}
+        >
+          Add Account
+        </MotionButton>
+        <MotionButton
+          variant="outline"
+          size="filter"
+          className="col-span-1 justify-center"
+          onClick={() => {
+            setTransacDailog(true);
+          }}
         >
           Add Transaction
         </MotionButton>
@@ -153,7 +242,7 @@ const Expenses = () => {
           <Item>
             <ItemContent>
               <ItemTitle className="text-md md:text-xl text-success">
-                Monthly Limit
+                Total Balance
               </ItemTitle>
               <ItemDescription className="text-xl md:text-3xl font-bold">
                 {formatCurrency(78400)}
@@ -165,7 +254,7 @@ const Expenses = () => {
           <Item>
             <ItemContent>
               <ItemTitle className="text-md md:text-xl text-destructive">
-                Monthly Expenses
+                Total Expenses
               </ItemTitle>
               <ItemDescription className="text-xl md:text-3xl font-bold">
                 {formatCurrency(32720)}
@@ -232,6 +321,340 @@ const Expenses = () => {
           </PaginationItem>
         </PaginationContent>
       </Pagination>
+      <Dialog open={transacDailog} onOpenChange={setTransacDailog}>
+        <DialogContent className="sm:max-w-[60%]">
+          <form onSubmit={handleSubmit(handleAddTransaction)}>
+            <DialogHeader>
+              <DialogTitle>Expense Configuration</DialogTitle>
+              <DialogDescription>
+                You can configure you expenses here
+              </DialogDescription>
+            </DialogHeader>
+            <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 p-4 max-h-[65vh] no-scrollbar overflow-y-auto">
+              <Field>
+                <FieldLabel htmlFor="amount">Amount</FieldLabel>
+                <Input
+                  id="amount"
+                  type="text"
+                  inputMode="decimal"
+                  min="1"
+                  autoComplete="off"
+                  className="w-full sm:max-w-60"
+                  aria-invalid={!!formState.errors.amount}
+                  {...register("amount", {
+                    required: "Amount is required",
+                    validate: (value) => {
+                      if (Number(value) == 0) {
+                        return "Amount must be greater then 0";
+                      }
+                      return true;
+                    },
+                    onChange: (e) => {
+                      const value = e.target.value;
+                      if (!/^\d*\.?\d{0,2}$/.test(value)) {
+                        e.target.value = value.slice(0, -1);
+                      }
+                    },
+                  })}
+                />
+                {formState.errors.amount && (
+                  <FieldError errors={[formState.errors.amount]} />
+                )}
+              </Field>
+              <Controller
+                name="trnasType"
+                control={control}
+                rules={{
+                  required: "Please Select",
+                }}
+                render={({ field, fieldState }) => (
+                  <Field key={field.value}>
+                    <FieldLabel htmlFor={field.name}>
+                      Transaction Type
+                    </FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        className="w-full sm:max-w-60"
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectGroup>
+                          <SelectItem value="debit">Pay-Out</SelectItem>
+                          <SelectItem value="credit">Credit-In</SelectItem>
+                          <SelectItem value="transfer">Transfer</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="transAcc"
+                control={control}
+                rules={{
+                  required: "Please Select",
+                }}
+                render={({ field, fieldState }) => (
+                  <Field key={field.value}>
+                    <FieldLabel htmlFor={field.name}>Account</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        className="w-full sm:max-w-60"
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectGroup>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="bank">Bank</SelectItem>
+                          <SelectItem value="wallet">Wallet</SelectItem>
+                          <SelectItem value="credit-card">
+                            Credit Card
+                          </SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="transCategory"
+                control={control}
+                rules={{
+                  required: "Please Select",
+                }}
+                render={({ field, fieldState }) => (
+                  <Field key={field.value}>
+                    <FieldLabel htmlFor={field.name}>
+                      Transaction Category
+                    </FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        className="w-full sm:max-w-60"
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectGroup>
+                          <SelectItem value="food">food</SelectItem>
+                          <SelectItem value="shopping">shopping</SelectItem>
+                          <SelectItem value="travel">travel</SelectItem>
+                          <SelectItem value="salary">salary</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Field>
+                <FieldLabel htmlFor="description">Description</FieldLabel>
+                <Input
+                  id="description"
+                  autoComplete="off"
+                  placeholder="Cheat Meal"
+                  className="w-full sm:max-w-60"
+                />
+              </Field>
+              <Controller
+                name="transDate"
+                control={control}
+                rules={{
+                  required: "Please Select",
+                }}
+                render={({ field, fieldState }) => (
+                  <Field className="gap-2" key={field.value}>
+                    <FieldLabel htmlFor={field.name}>
+                      Date of transaction
+                    </FieldLabel>
+                    <DateInput
+                      {...field}
+                      id={field.name}
+                      className="sm:max-w-60 p-1"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="transPayMethod"
+                control={control}
+                rules={{
+                  required: trnasType === "debit" ? "Please Select" : false,
+                }}
+                render={({ field, fieldState }) => (
+                  <Field key={field.value}>
+                    <FieldLabel htmlFor={field.name}>Payment Method</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        className="w-full sm:max-w-60"
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectGroup>
+                          <SelectItem value="upi">UPI</SelectItem>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="card">Card</SelectItem>
+                          <SelectItem value="net-banking">
+                            Net Banking
+                          </SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Field key="merchant" data-invalid={formState.errors.merchant}>
+                <FieldLabel htmlFor="merchant">Merchant Name</FieldLabel>
+                <Input
+                  id="merchant"
+                  autoComplete="off"
+                  placeholder="Amazon"
+                  className="w-full sm:max-w-60"
+                  aria-invalid={!!formState.errors.merchant}
+                  {...register("merchant", {
+                    required:
+                      trnasType === "debit"
+                        ? "Merchant Name is required"
+                        : false,
+                  })}
+                />
+                {formState.errors.merchant && (
+                  <FieldError errors={[formState.errors.merchant]} />
+                )}
+              </Field>
+              <Field className="col-span-1 sm:col-span-2">
+                <FieldLabel htmlFor="transNote">Add Notes</FieldLabel>
+                <Textarea
+                  id="transNote"
+                  autoComplete="off"
+                  placeholder="You can add a note related to your transaction here."
+                />
+              </Field>
+            </FieldGroup>
+            <DialogFooter>
+              <DialogClose asChild>
+                <MotionButton type="button" variant="outline" size="lg">
+                  Cancel
+                </MotionButton>
+              </DialogClose>
+              <MotionButton type="submit" size="lg">
+                Update
+              </MotionButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={accDailog} onOpenChange={setAccDailog}>
+        <DialogContent className="sm:max-w-[60%] lg:max-w-[40%]">
+          <form onSubmit={accHandleSubmit(handleAddAccount)}>
+            <DialogHeader>
+              <DialogTitle>Account Configuration</DialogTitle>
+              <DialogDescription>
+                You can add new account or modify your existing one
+              </DialogDescription>
+            </DialogHeader>
+            <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 p-4 max-h-[65vh] no-scrollbar overflow-y-auto">
+              <Field key="accName" data-invalid={accFormState.errors.accName}>
+                <FieldLabel htmlFor="accName">Account Name</FieldLabel>
+                <Input
+                  id="accName"
+                  autoComplete="off"
+                  placeholder="XYZ Bank"
+                  className="w-full sm:max-w-60"
+                  aria-invalid={!!accFormState.errors.accName}
+                  {...accRegister("accName", {
+                    required: "Account Name is required",
+                  })}
+                />
+                {accFormState.errors.accName && (
+                  <FieldError errors={[accFormState.errors.accName]} />
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="accAmount">Amount</FieldLabel>
+                <Input
+                  id="accAmount"
+                  type="text"
+                  inputMode="decimal"
+                  min="0"
+                  autoComplete="off"
+                  className="w-full sm:max-w-60"
+                  aria-invalid={!!accFormState.errors.accAmount}
+                  {...accRegister("accAmount", {
+                    required: "Amount is required",
+                    validate: (value) => {
+                      if (Number(value) == 0) {
+                        return "Amount must be greater then 0";
+                      }
+                      return true;
+                    },
+                    onChange: (e) => {
+                      const value = e.target.value;
+                      if (!/^\d*\.?\d{0,2}$/.test(value)) {
+                        e.target.value = value.slice(0, -1);
+                      }
+                    },
+                  })}
+                />
+                {accFormState.errors.accAmount && (
+                  <FieldError errors={[accFormState.errors.accAmount]} />
+                )}
+              </Field>
+            </FieldGroup>
+            <DialogFooter>
+              <DialogClose asChild>
+                <MotionButton type="button" variant="outline" size="lg">
+                  Cancel
+                </MotionButton>
+              </DialogClose>
+              <MotionButton type="submit" size="lg">
+                Add
+              </MotionButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </BaseLayout>
   );
 };

@@ -57,7 +57,7 @@ const Profile = () => {
       currency: "",
     },
   });
-  const { handleSubmit, control, reset, register } = form;
+  const { handleSubmit, control, reset } = form;
   const passwordForm = useForm();
 
   const {

@@ -8,7 +8,7 @@ import { useState } from "react";
 
 export const useUser = () => {
   const [data, setData] = useState(null);
-  const [apiError, serApiError] = useState(null);
+  const [apiError, setApiError] = useState(null);
   const [loading, setLoading] = useState(false);
   const getUserInfo = async () => {
     setLoading(true);
@@ -37,7 +37,7 @@ export const useUser = () => {
       const data = await passwordUpdate(payload);
       setData(data);
     } catch (err) {
-      serApiError(err?.response?.data);
+      setApiError(err?.response?.data);
       throw err;
     }
   };
@@ -47,7 +47,7 @@ export const useUser = () => {
       const data = await profileImgUpload(payload);
       setData(data);
     } catch (err) {
-      serApiError(err?.response?.data);
+      setApiError(err?.response?.data);
       throw err;
     } finally {
       setLoading(false);

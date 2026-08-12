@@ -41,6 +41,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import PasswordInput from "@/components/common/PasswordInput";
+import LoadingScreen from "@/components/common/LoadingScreen";
 
 const Profile = () => {
   const imgUploadInputRef = useRef(null);
@@ -200,11 +201,7 @@ const Profile = () => {
     } catch (err) {}
   };
   if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center gap-4">
-        <Spinner className="size-8" />
-      </div>
-    );
+    return <LoadingScreen />;
   }
   return (
     <BaseLayout

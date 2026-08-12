@@ -18,8 +18,11 @@ import {
 } from "@/components/ui/pagination";
 import {
   Item,
+  ItemActions,
   ItemContent,
   ItemDescription,
+  ItemGroup,
+  ItemHeader,
   ItemTitle,
 } from "@/components/ui/item";
 import CardLayout from "@/components/common/CardLayout";
@@ -31,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import MotionButton from "@/components/motionUI/MotionButton";
-import { ArrowBigDown, ChevronDown } from "lucide-react";
+import { ArrowBigDown, ChevronDown, EditIcon } from "lucide-react";
 import DatePickerWithRange from "@/components/common/DatePickerWithRange";
 import { useEffect, useState } from "react";
 import {
@@ -60,9 +63,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DateInput from "@/components/common/DateInput";
+import LoadingScreen from "@/components/common/LoadingScreen";
 import { Textarea } from "@/components/ui/textarea";
 import { useAcc } from "@/hooks/useAcc";
-import { Spinner } from "@/components/ui/spinner";
+import { useTransac } from "@/hooks/useTransac";
 import { toast } from "sonner";
 
 const invoices = [
@@ -121,7 +125,9 @@ const Expenses = () => {
   } = AccountForm;
   const [transacDailog, setTransacDailog] = useState(false);
   const [accDailog, setAccDailog] = useState(false);
+  const [accList, setAccList] = useState(null);
   const { handleAdd, loading, apiError, apiData } = useAcc();
+  const { getTranList, tranLoading, tranApiData, tranApiError } = useTransac();
   const trnasType = useWatch({
     control,
     name: "trnasType",
@@ -138,6 +144,19 @@ const Expenses = () => {
     await handleAdd(accData);
   };
   useEffect(() => {
+    const fetchTransactions = async () => {
+      await getTranList();
+    };
+    fetchTransactions();
+  }, []);
+  useEffect(() => {
+    if (!tranApiData) return;
+    if (tranApiData.success) {
+      toast.success(tranApiData.message);
+      setAccList(tranApiData?.data?.accList || []);
+    }
+  }, [tranApiData]);
+  useEffect(() => {
     if (!apiData) return;
     if (apiData.success) {
       toast.success(apiData.message);
@@ -149,12 +168,8 @@ const Expenses = () => {
     if (!apiError) return;
     toast.error(apiError.message);
   }, [apiError]);
-  if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center gap-4">
-        <Spinner className="size-8" />
-      </div>
-    );
+  if (loading || tranLoading) {
+    return <LoadingScreen />;
   }
   return (
     <BaseLayout
@@ -421,12 +436,14 @@ const Expenses = () => {
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectGroup>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="bank">Bank</SelectItem>
-                          <SelectItem value="wallet">Wallet</SelectItem>
-                          <SelectItem value="credit-card">
-                            Credit Card
-                          </SelectItem>
+                          {accList?.map((acc) => (
+                            <SelectItem
+                              key={acc._id}
+                              value={acc.name.toLowerCase().replace(" ", "-")}
+                            >
+                              {acc.name} - <span>{acc.balance}</span>
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -594,6 +611,30 @@ const Expenses = () => {
                 You can add new account or modify your existing one
               </DialogDescription>
             </DialogHeader>
+            <ItemGroup>
+              <ItemHeader>
+                <ItemTitle>Accounts List</ItemTitle>
+              </ItemHeader>
+              {accList?.map((acc) => (
+                <Item key={acc._id} className="max-w-1/2">
+                  <ItemContent>
+                    <div className="flex flex-row">
+                      <ItemTitle>Account Name:</ItemTitle>
+                      <ItemDescription>{acc.name}</ItemDescription>
+                    </div>
+                    <div className="flex flex-row">
+                      <ItemTitle>Account Balance:</ItemTitle>
+                      <ItemDescription>{acc.balance}</ItemDescription>
+                    </div>
+                  </ItemContent>
+                  <ItemActions>
+                    <MotionButton type="button" variant="ghost">
+                      <EditIcon />
+                    </MotionButton>
+                  </ItemActions>
+                </Item>
+              ))}
+            </ItemGroup>
             <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 p-4 max-h-[65vh] no-scrollbar overflow-y-auto">
               <Field key="accName" data-invalid={accFormState.errors.accName}>
                 <FieldLabel htmlFor="accName">Account Name</FieldLabel>

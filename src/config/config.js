@@ -27,6 +27,7 @@ const apiUrl = {
   authUrl: `${backendDomain}auth`,
   userUrl: `${backendDomain}user`,
   accUrl: `${backendDomain}acc`,
+  tranUrl: `${backendDomain}tran`,
 };
 
 export { navItem, apiUrl };

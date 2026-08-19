@@ -34,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import MotionButton from "@/components/motionUI/MotionButton";
-import { ArrowBigDown, ChevronDown, EditIcon } from "lucide-react";
+import { ChevronDown, EditIcon, Trash2Icon, X } from "lucide-react";
 import DatePickerWithRange from "@/components/common/DatePickerWithRange";
 import { useEffect, useState } from "react";
 import {
@@ -62,12 +62,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import DateInput from "@/components/common/DateInput";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { useAcc } from "@/hooks/useAcc";
 import { useTransac } from "@/hooks/useTransac";
 import { toast } from "sonner";
+import { AccListColors } from "@/config/colorConfig";
 
 const invoices = [
   {
@@ -125,8 +138,12 @@ const Expenses = () => {
   } = AccountForm;
   const [transacDailog, setTransacDailog] = useState(false);
   const [accDailog, setAccDailog] = useState(false);
+  const [isAccEditable, setIsAccEditable] = useState(false);
+  const [accDltConf, setAccDltConf] = useState(false);
+  const [delAccName, setDelAccName] = useState("");
+  const [accId, setAccId] = useState("");
   const [accList, setAccList] = useState(null);
-  const { handleAdd, loading, apiError, apiData } = useAcc();
+  const { handleAdd, handleDelete, loading, apiError, apiData } = useAcc();
   const { getTranList, tranLoading, tranApiData, tranApiError } = useTransac();
   const trnasType = useWatch({
     control,
@@ -141,7 +158,16 @@ const Expenses = () => {
       accBalance: Number(data.accAmount),
       isActive: true,
     };
+    if (isAccEditable) {
+      accData.accId = accId;
+    }
     await handleAdd(accData);
+  };
+  const handleAccDel = async () => {
+    const accData = {
+      accId,
+    };
+    await handleDelete(accData);
   };
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -161,13 +187,52 @@ const Expenses = () => {
     if (apiData.success) {
       toast.success(apiData.message);
       setAccDailog(false);
-      AccountForm.reset();
+      setAccDltConf(false);
+      setIsAccEditable(false);
+      setAccId("");
+      setDelAccName("");
+      AccountForm.reset({
+        accName: "",
+        accAmount: "",
+      });
+      window.location.reload();
     }
   }, [apiData]);
   useEffect(() => {
     if (!apiError) return;
     toast.error(apiError.message);
   }, [apiError]);
+  const handleAccEdit = (data) => {
+    AccountForm.reset({
+      accName: data.name,
+      accAmount: data.balance,
+    });
+    setIsAccEditable(true);
+    setAccId(data._id);
+  };
+  const handleAccDailogChange = (isOpen) => {
+    setAccDailog(isOpen);
+    if (!isOpen) {
+      AccountForm.reset({
+        accName: "",
+        accAmount: "",
+      });
+      setIsAccEditable(false);
+      setAccId("");
+    }
+  };
+  const handleAccDelete = (data) => {
+    setDelAccName(data.name);
+    setAccId(data._id);
+    setAccDltConf(true);
+  };
+  const handleAccDltAlert = (isOpen) => {
+    setAccDltConf(isOpen);
+    if (!isOpen) {
+      setDelAccName("");
+      setAccId("");
+    }
+  };
   if (loading || tranLoading) {
     return <LoadingScreen />;
   }
@@ -602,39 +667,62 @@ const Expenses = () => {
           </form>
         </DialogContent>
       </Dialog>
-      <Dialog open={accDailog} onOpenChange={setAccDailog}>
-        <DialogContent className="sm:max-w-[60%] lg:max-w-[40%]">
+      <Dialog open={accDailog} onOpenChange={handleAccDailogChange}>
+        <DialogContent className="sm:max-w-[60%] xl:max-w-[40%]">
           <form onSubmit={accHandleSubmit(handleAddAccount)}>
             <DialogHeader>
-              <DialogTitle>Account Configuration</DialogTitle>
+              <DialogTitle className="text-sm md:text-xl">
+                Account Configuration
+              </DialogTitle>
               <DialogDescription>
                 You can add new account or modify your existing one
               </DialogDescription>
             </DialogHeader>
-            <ItemGroup>
-              <ItemHeader>
-                <ItemTitle>Accounts List</ItemTitle>
-              </ItemHeader>
-              {accList?.map((acc) => (
-                <Item key={acc._id} className="max-w-1/2">
-                  <ItemContent>
-                    <div className="flex flex-row">
-                      <ItemTitle>Account Name:</ItemTitle>
-                      <ItemDescription>{acc.name}</ItemDescription>
-                    </div>
-                    <div className="flex flex-row">
-                      <ItemTitle>Account Balance:</ItemTitle>
-                      <ItemDescription>{acc.balance}</ItemDescription>
-                    </div>
-                  </ItemContent>
-                  <ItemActions>
-                    <MotionButton type="button" variant="ghost">
-                      <EditIcon />
-                    </MotionButton>
-                  </ItemActions>
-                </Item>
-              ))}
-            </ItemGroup>
+            <div className="text-xl md:text-xl font-bold mt-2">
+              Account List
+            </div>
+            <div className="grid lg:grid-cols-2 gap-4 p-4 max-h-[30vh] overflow-y-auto">
+              {accList?.map((acc, index) => {
+                const listColor = AccListColors[index % AccListColors.length];
+                return (
+                  <CardLayout
+                    key={acc._id}
+                    className={`p-2 ${listColor.bg} ${listColor.border}`}
+                  >
+                    <Item className="p-0 items-start">
+                      <ItemContent>
+                        <ItemTitle className={`text-lg ${listColor.text}`}>
+                          Account Overview
+                        </ItemTitle>
+                        <ItemTitle className="text-md">{acc.name}</ItemTitle>
+                        <ItemDescription className="text-md">
+                          {formatCurrency(acc.balance)}
+                        </ItemDescription>
+                      </ItemContent>
+                      <ItemActions>
+                        <MotionButton
+                          onClick={() => handleAccDelete(acc)}
+                          type="button"
+                          variant="ghost"
+                          className="p-0"
+                        >
+                          <Trash2Icon />
+                        </MotionButton>
+                        <MotionButton
+                          onClick={() => handleAccEdit(acc)}
+                          type="button"
+                          variant="ghost"
+                          className="p-0"
+                        >
+                          <EditIcon />
+                        </MotionButton>
+                      </ItemActions>
+                    </Item>
+                  </CardLayout>
+                );
+              })}
+            </div>
+            <Separator />
             <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 p-4 max-h-[65vh] no-scrollbar overflow-y-auto">
               <Field key="accName" data-invalid={accFormState.errors.accName}>
                 <FieldLabel htmlFor="accName">Account Name</FieldLabel>
@@ -659,7 +747,9 @@ const Expenses = () => {
                   type="text"
                   inputMode="decimal"
                   min="0"
+                  placeholder="Initial Balance"
                   autoComplete="off"
+                  disabled={isAccEditable}
                   className="w-full sm:max-w-60"
                   aria-invalid={!!accFormState.errors.accAmount}
                   {...accRegister("accAmount", {
@@ -690,12 +780,29 @@ const Expenses = () => {
                 </MotionButton>
               </DialogClose>
               <MotionButton type="submit" size="lg">
-                Add
+                {isAccEditable ? <>Update</> : <>Add</>}
               </MotionButton>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={accDltConf} onOpenChange={handleAccDltAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your{" "}
+              {delAccName} account from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleAccDel}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </BaseLayout>
   );
 };

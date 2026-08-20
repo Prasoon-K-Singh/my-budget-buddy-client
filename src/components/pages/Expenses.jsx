@@ -164,10 +164,7 @@ const Expenses = () => {
     await handleAdd(accData);
   };
   const handleAccDel = async () => {
-    const accData = {
-      accId,
-    };
-    await handleDelete(accData);
+    await handleDelete(accId);
   };
   useEffect(() => {
     const fetchTransactions = async () => {

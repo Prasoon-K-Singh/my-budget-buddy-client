@@ -17,7 +17,7 @@ export async function createAcc(payload) {
 
 export async function deleteAcc(payload) {
   try {
-    const response = await api.post("/delete", payload);
+    const response = await api.post(`/delete/${payload}`);
     return response.data;
   } catch (err) {
     throw err;

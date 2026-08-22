@@ -26,7 +26,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import CardLayout from "@/components/common/CardLayout";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, paiseToRupees, rupeesToPaise } from "@/lib/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import MotionButton from "@/components/motionUI/MotionButton";
-import { ChevronDown, EditIcon, Trash2Icon, X } from "lucide-react";
+import {
+  ChevronDown,
+  CloudAlertIcon,
+  EditIcon,
+  Trash2Icon,
+} from "lucide-react";
 import DatePickerWithRange from "@/components/common/DatePickerWithRange";
 import { useEffect, useState } from "react";
 import {
@@ -73,6 +78,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import DateInput from "@/components/common/DateInput";
 import LoadingScreen from "@/components/common/LoadingScreen";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,51 +94,9 @@ import { useAcc } from "@/hooks/useAcc";
 import { useTransac } from "@/hooks/useTransac";
 import { toast } from "sonner";
 import { AccListColors } from "@/config/colorConfig";
-
-const invoices = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-];
+import { payMethod, transType } from "@/config/config";
+import { format } from "date-fns";
+import { formatTransactionNo } from "@/lib/utils";
 
 const Expenses = () => {
   const transacForm = useForm();
@@ -142,20 +113,36 @@ const Expenses = () => {
   const [accDltConf, setAccDltConf] = useState(false);
   const [delAccName, setDelAccName] = useState("");
   const [accId, setAccId] = useState("");
-  const [accList, setAccList] = useState(null);
+  const [transacList, setTransacList] = useState([]);
+  const [accList, setAccList] = useState([]);
+  const [catList, setCatList] = useState([]);
+  const [balList, setBalList] = useState({});
   const { handleAdd, handleDelete, loading, apiError, apiData } = useAcc();
-  const { getTranList, tranLoading, tranApiData, tranApiError } = useTransac();
-  const trnasType = useWatch({
-    control,
-    name: "trnasType",
-  });
+  const { addTran, getTranList, tranLoading, tranApiData, tranApiError } =
+    useTransac();
+
   const handleAddTransaction = async (data) => {
     console.log("data: ", data);
+    const bal = rupeesToPaise(data.amount);
+    const date = data.transDate ? data.transDate.getTime() : null;
+    const tranDet = {
+      transDate: date,
+      transAmount: bal,
+      transType: data.trnasType,
+      transAccount: data.transAcc,
+      transCategory: data.transCategory,
+      transMethod: data.transPayMethod,
+      transMerchant: data.merchant,
+      transDesc: data.transDesc,
+      transNotes: data.transNote,
+    };
+    await addTran(tranDet);
   };
   const handleAddAccount = async (data) => {
+    const bal = rupeesToPaise(data.accAmount);
     const accData = {
       accName: data.accName,
-      accBalance: Number(data.accAmount),
+      accBalance: bal,
       isActive: true,
     };
     if (isAccEditable) {
@@ -176,9 +163,16 @@ const Expenses = () => {
     if (!tranApiData) return;
     if (tranApiData.success) {
       toast.success(tranApiData.message);
+      setTransacList(tranApiData?.data?.transacList || []);
       setAccList(tranApiData?.data?.accList || []);
+      setCatList(tranApiData?.data?.catList || []);
+      setBalList(tranApiData?.data?.balList || {});
     }
   }, [tranApiData]);
+  useEffect(() => {
+    if (!tranApiError) return;
+    toast.error(tranApiError.message);
+  }, [tranApiError]);
   useEffect(() => {
     if (!apiData) return;
     if (apiData.success) {
@@ -200,9 +194,10 @@ const Expenses = () => {
     toast.error(apiError.message);
   }, [apiError]);
   const handleAccEdit = (data) => {
+    const bal = paiseToRupees(data.balance);
     AccountForm.reset({
       accName: data.name,
-      accAmount: data.balance,
+      accAmount: bal,
     });
     setIsAccEditable(true);
     setAccId(data._id);
@@ -322,7 +317,7 @@ const Expenses = () => {
                 Total Balance
               </ItemTitle>
               <ItemDescription className="text-xl md:text-3xl font-bold">
-                {formatCurrency(78400)}
+                {formatCurrency(balList.totalBalance)}
               </ItemDescription>
             </ItemContent>
           </Item>
@@ -334,7 +329,7 @@ const Expenses = () => {
                 Total Expenses
               </ItemTitle>
               <ItemDescription className="text-xl md:text-3xl font-bold">
-                {formatCurrency(32720)}
+                {formatCurrency(balList.totalExpense)}
               </ItemDescription>
             </ItemContent>
           </Item>
@@ -355,23 +350,76 @@ const Expenses = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-25">Invoice</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>ID</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Account</TableHead>
+            <TableHead>Category</TableHead>
             <TableHead>Method</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
+            <TableHead>Merchant</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Note</TableHead>
+            <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {invoices.map((invoice) => (
-            <TableRow key={invoice.invoice}>
-              <TableCell className="font-medium">{invoice.invoice}</TableCell>
-              <TableCell>{invoice.paymentStatus}</TableCell>
-              <TableCell>{invoice.paymentMethod}</TableCell>
-              <TableCell className="text-right">
-                {invoice.totalAmount}
+          {transacList.length > 0 ? (
+            transacList.map((transac) => (
+              <TableRow key={transac._id}>
+                <TableCell>
+                  {formatTransactionNo(transac.transactionNo)}
+                </TableCell>
+                <TableCell>
+                  {format(new Date(transac.transactionDate), "dd/MM/yyyy")}
+                </TableCell>
+                <TableCell>{formatCurrency(transac.amount)}</TableCell>
+                <TableCell>{transType[transac.type]}</TableCell>
+                <TableCell>{transac.accountId.name}</TableCell>
+                <TableCell>{transac.categoryId.name}</TableCell>
+                <TableCell>{payMethod[transac.paymentMethod]}</TableCell>
+                <TableCell>{transac.merchantName}</TableCell>
+                <TableCell>{transac.description}</TableCell>
+                <TableCell>{transac.notes}</TableCell>
+                <TableCell className="flex justify-around">
+                  <MotionButton
+                    // onClick={() => handleAccEdit(acc)}
+                    type="button"
+                    variant="ghost"
+                    className="p-0"
+                  >
+                    <EditIcon />
+                  </MotionButton>
+                  <MotionButton
+                    // onClick={() => handleAccDelete(acc)}
+                    type="button"
+                    variant="ghost"
+                    className="p-0"
+                  >
+                    <Trash2Icon />
+                  </MotionButton>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={11}>
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <CloudAlertIcon />
+                    </EmptyMedia>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <EmptyTitle>No Transaction found</EmptyTitle>
+                    <EmptyDescription>
+                      Add tranasaction to get started
+                    </EmptyDescription>
+                  </EmptyContent>
+                </Empty>
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
       <Pagination className="py-3.5 bg-muted border rounded-b-lg shadow-2xl relative z-10">
@@ -399,7 +447,7 @@ const Expenses = () => {
         </PaginationContent>
       </Pagination>
       <Dialog open={transacDailog} onOpenChange={setTransacDailog}>
-        <DialogContent className="sm:max-w-[60%]">
+        <DialogContent className="sm:max-w-[60%] xl:max-w-[40%]">
           <form onSubmit={handleSubmit(handleAddTransaction)}>
             <DialogHeader>
               <DialogTitle>Expense Configuration</DialogTitle>
@@ -408,6 +456,30 @@ const Expenses = () => {
               </DialogDescription>
             </DialogHeader>
             <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 p-4 max-h-[65vh] no-scrollbar overflow-y-auto">
+              <Controller
+                name="transDate"
+                control={control}
+                rules={{
+                  required: "Please Select",
+                }}
+                render={({ field, fieldState }) => (
+                  <Field className="gap-2" key={field.value}>
+                    <FieldLabel htmlFor={field.name}>
+                      Date of transaction
+                    </FieldLabel>
+                    <DateInput
+                      {...field}
+                      id={field.name}
+                      className="sm:max-w-60 p-1"
+                      maxDate={new Date()}
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <Field>
                 <FieldLabel htmlFor="amount">Amount</FieldLabel>
                 <Input
@@ -415,6 +487,7 @@ const Expenses = () => {
                   type="text"
                   inputMode="decimal"
                   min="1"
+                  placeholder="Amount"
                   autoComplete="off"
                   className="w-full sm:max-w-60"
                   aria-invalid={!!formState.errors.amount}
@@ -463,9 +536,11 @@ const Expenses = () => {
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectGroup>
-                          <SelectItem value="debit">Pay-Out</SelectItem>
-                          <SelectItem value="credit">Credit-In</SelectItem>
-                          <SelectItem value="transfer">Transfer</SelectItem>
+                          {Object.entries(transType).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -499,11 +574,8 @@ const Expenses = () => {
                       <SelectContent position="popper">
                         <SelectGroup>
                           {accList?.map((acc) => (
-                            <SelectItem
-                              key={acc._id}
-                              value={acc.name.toLowerCase().replace(" ", "-")}
-                            >
-                              {acc.name} - <span>{acc.balance}</span>
+                            <SelectItem key={acc._id} value={acc._id}>
+                              {acc.name}
                             </SelectItem>
                           ))}
                         </SelectGroup>
@@ -540,45 +612,14 @@ const Expenses = () => {
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectGroup>
-                          <SelectItem value="food">food</SelectItem>
-                          <SelectItem value="shopping">shopping</SelectItem>
-                          <SelectItem value="travel">travel</SelectItem>
-                          <SelectItem value="salary">salary</SelectItem>
+                          {catList?.map((cat) => (
+                            <SelectItem key={cat._id} value={cat._id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Field>
-                <FieldLabel htmlFor="description">Description</FieldLabel>
-                <Input
-                  id="description"
-                  autoComplete="off"
-                  placeholder="Cheat Meal"
-                  className="w-full sm:max-w-60"
-                />
-              </Field>
-              <Controller
-                name="transDate"
-                control={control}
-                rules={{
-                  required: "Please Select",
-                }}
-                render={({ field, fieldState }) => (
-                  <Field className="gap-2" key={field.value}>
-                    <FieldLabel htmlFor={field.name}>
-                      Date of transaction
-                    </FieldLabel>
-                    <DateInput
-                      {...field}
-                      id={field.name}
-                      className="sm:max-w-60 p-1"
-                      aria-invalid={fieldState.invalid}
-                    />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
                     )}
@@ -589,7 +630,7 @@ const Expenses = () => {
                 name="transPayMethod"
                 control={control}
                 rules={{
-                  required: trnasType === "debit" ? "Please Select" : false,
+                  required: "Please Select",
                 }}
                 render={({ field, fieldState }) => (
                   <Field key={field.value}>
@@ -608,12 +649,11 @@ const Expenses = () => {
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectGroup>
-                          <SelectItem value="upi">UPI</SelectItem>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="card">Card</SelectItem>
-                          <SelectItem value="net-banking">
-                            Net Banking
-                          </SelectItem>
+                          {Object.entries(payMethod).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -632,21 +672,29 @@ const Expenses = () => {
                   className="w-full sm:max-w-60"
                   aria-invalid={!!formState.errors.merchant}
                   {...register("merchant", {
-                    required:
-                      trnasType === "debit"
-                        ? "Merchant Name is required"
-                        : false,
+                    required: "Merchant Name is required",
                   })}
                 />
                 {formState.errors.merchant && (
                   <FieldError errors={[formState.errors.merchant]} />
                 )}
               </Field>
-              <Field className="col-span-1 sm:col-span-2">
+              <Field key="transDesc">
+                <FieldLabel htmlFor="transDesc">Description</FieldLabel>
+                <Input
+                  id="transDesc"
+                  autoComplete="off"
+                  placeholder="Description"
+                  className="w-full sm:max-w-60"
+                  {...register("transDesc")}
+                />
+              </Field>
+              <Field key="transNote" className="col-span-1 sm:col-span-2">
                 <FieldLabel htmlFor="transNote">Add Notes</FieldLabel>
                 <Textarea
                   id="transNote"
                   autoComplete="off"
+                  {...register("transNote")}
                   placeholder="You can add a note related to your transaction here."
                 />
               </Field>
@@ -658,7 +706,7 @@ const Expenses = () => {
                 </MotionButton>
               </DialogClose>
               <MotionButton type="submit" size="lg">
-                Update
+                Add
               </MotionButton>
             </DialogFooter>
           </form>
@@ -678,47 +726,63 @@ const Expenses = () => {
             <div className="text-xl md:text-xl font-bold mt-2">
               Account List
             </div>
-            <div className="grid lg:grid-cols-2 gap-4 p-4 max-h-[30vh] overflow-y-auto">
-              {accList?.map((acc, index) => {
-                const listColor = AccListColors[index % AccListColors.length];
-                return (
-                  <CardLayout
-                    key={acc._id}
-                    className={`p-2 ${listColor.bg} ${listColor.border}`}
-                  >
-                    <Item className="p-0 items-start">
-                      <ItemContent>
-                        <ItemTitle className={`text-lg ${listColor.text}`}>
-                          Account Overview
-                        </ItemTitle>
-                        <ItemTitle className="text-md">{acc.name}</ItemTitle>
-                        <ItemDescription className="text-md">
-                          {formatCurrency(acc.balance)}
-                        </ItemDescription>
-                      </ItemContent>
-                      <ItemActions>
-                        <MotionButton
-                          onClick={() => handleAccDelete(acc)}
-                          type="button"
-                          variant="ghost"
-                          className="p-0"
-                        >
-                          <Trash2Icon />
-                        </MotionButton>
-                        <MotionButton
-                          onClick={() => handleAccEdit(acc)}
-                          type="button"
-                          variant="ghost"
-                          className="p-0"
-                        >
-                          <EditIcon />
-                        </MotionButton>
-                      </ItemActions>
-                    </Item>
-                  </CardLayout>
-                );
-              })}
-            </div>
+            {accList.length > 0 ? (
+              <div className="grid lg:grid-cols-2 gap-4 p-4 max-h-[30vh] overflow-y-auto">
+                {accList?.map((acc, index) => {
+                  const listColor = AccListColors[index % AccListColors.length];
+                  return (
+                    <CardLayout
+                      key={acc._id}
+                      className={`p-2 ${listColor.bg} ${listColor.border}`}
+                    >
+                      <Item className="p-0 items-start">
+                        <ItemContent>
+                          <ItemTitle className={`text-lg ${listColor.text}`}>
+                            Account Overview
+                          </ItemTitle>
+                          <ItemTitle className="text-md">{acc.name}</ItemTitle>
+                          <ItemDescription className="text-md">
+                            {formatCurrency(acc.balance)}
+                          </ItemDescription>
+                        </ItemContent>
+                        <ItemActions>
+                          <MotionButton
+                            onClick={() => handleAccDelete(acc)}
+                            type="button"
+                            variant="ghost"
+                            className="p-0"
+                          >
+                            <Trash2Icon />
+                          </MotionButton>
+                          <MotionButton
+                            onClick={() => handleAccEdit(acc)}
+                            type="button"
+                            variant="ghost"
+                            className="p-0"
+                          >
+                            <EditIcon />
+                          </MotionButton>
+                        </ItemActions>
+                      </Item>
+                    </CardLayout>
+                  );
+                })}
+              </div>
+            ) : (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <CloudAlertIcon />
+                  </EmptyMedia>
+                </EmptyHeader>
+                <EmptyContent>
+                  <EmptyTitle>No Account found</EmptyTitle>
+                  <EmptyDescription>
+                    Add Account to get started
+                  </EmptyDescription>
+                </EmptyContent>
+              </Empty>
+            )}
             <Separator />
             <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 p-4 max-h-[65vh] no-scrollbar overflow-y-auto">
               <Field key="accName" data-invalid={accFormState.errors.accName}>

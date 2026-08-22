@@ -1,4 +1,4 @@
-import { createAcc } from "@/services/accApi";
+import { createAcc, deleteAcc } from "@/services/accApi";
 import { useState } from "react";
 
 export const useAcc = () => {
@@ -16,6 +16,17 @@ export const useAcc = () => {
       setLoading(false);
     }
   };
+  const handleDelete = async (payload) => {
+    setLoading(true);
+    try {
+      const data = await deleteAcc(payload);
+      setApiData(data);
+    } catch (err) {
+      setApiError(err?.response?.data);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  return { loading, apiData, apiError, handleAdd };
+  return { loading, apiData, apiError, handleAdd, handleDelete };
 };

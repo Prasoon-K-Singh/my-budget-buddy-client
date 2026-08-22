@@ -30,4 +30,16 @@ const apiUrl = {
   tranUrl: `${backendDomain}tran`,
 };
 
-export { navItem, apiUrl };
+const transType = {
+  debit: "Pay-out",
+  credit: "Credit-in",
+};
+
+const payMethod = {
+  upi: "UPI",
+  cash: "Cash",
+  card: "Card",
+  "net-bank": "Net Banking",
+};
+
+export { navItem, apiUrl, transType, payMethod };

@@ -6,6 +6,15 @@ const api = axios.create({
   withCredentials: true,
 });
 
+export async function tranAdd(payload) {
+  try {
+    const response = await api.post("/add", payload);
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+}
+
 export async function tranList() {
   try {
     const response = await api.get("/list");

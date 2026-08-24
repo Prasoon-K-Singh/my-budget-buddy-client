@@ -3,15 +3,18 @@ import { useState } from "react";
 
 export const useAcc = () => {
   const [loading, setLoading] = useState(false);
-  const [apiData, setApiData] = useState(null);
-  const [apiError, setApiError] = useState(null);
   const handleAdd = async (payload) => {
     setLoading(true);
     try {
       const data = await createAcc(payload);
-      setApiData(data);
+      return data;
     } catch (err) {
-      setApiError(err?.response?.data);
+      return (
+        err?.response?.data || {
+          success: false,
+          message: "Something went wrong",
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -20,13 +23,18 @@ export const useAcc = () => {
     setLoading(true);
     try {
       const data = await deleteAcc(payload);
-      setApiData(data);
+      return data;
     } catch (err) {
-      setApiError(err?.response?.data);
+      return (
+        err?.response?.data || {
+          success: false,
+          message: "Something went wrong",
+        }
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  return { loading, apiData, apiError, handleAdd, handleDelete };
+  return { handleAdd, handleDelete, loading };
 };

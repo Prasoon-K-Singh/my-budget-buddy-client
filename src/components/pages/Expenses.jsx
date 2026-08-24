@@ -1,4 +1,4 @@
-import BaseLayout from "@/components/common/BaseLayout";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -21,27 +21,14 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
-  ItemGroup,
-  ItemHeader,
   ItemTitle,
 } from "@/components/ui/item";
-import CardLayout from "@/components/common/CardLayout";
-import { formatCurrency, paiseToRupees, rupeesToPaise } from "@/lib/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import MotionButton from "@/components/motionUI/MotionButton";
-import {
-  ChevronDown,
-  CloudAlertIcon,
-  EditIcon,
-  Trash2Icon,
-} from "lucide-react";
-import DatePickerWithRange from "@/components/common/DatePickerWithRange";
-import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -57,8 +44,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   Select,
   SelectContent,
@@ -86,17 +71,30 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import DateInput from "@/components/common/DateInput";
-import LoadingScreen from "@/components/common/LoadingScreen";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { useAcc } from "@/hooks/useAcc";
-import { useTransac } from "@/hooks/useTransac";
+import DateInput from "@/components/common/DateInput";
+import CardLayout from "@/components/common/CardLayout";
+import BaseLayout from "@/components/common/BaseLayout";
+import LoadingScreen from "@/components/common/LoadingScreen";
+import DatePickerWithRange from "@/components/common/DatePickerWithRange";
+import MotionButton from "@/components/motionUI/MotionButton";
 import { toast } from "sonner";
 import { AccListColors } from "@/config/colorConfig";
 import { payMethod, transType } from "@/config/config";
-import { format } from "date-fns";
+import { useAcc } from "@/hooks/useAcc";
+import { useTransac } from "@/hooks/useTransac";
 import { formatTransactionNo } from "@/lib/utils";
+import { formatCurrency, paiseToRupees, rupeesToPaise } from "@/lib/currency";
+import { Controller, useForm } from "react-hook-form";
+import { format } from "date-fns";
+import {
+  ChevronDown,
+  CloudAlertIcon,
+  EditIcon,
+  Trash2Icon,
+} from "lucide-react";
 
 const Expenses = () => {
   const transacForm = useForm();
@@ -109,26 +107,64 @@ const Expenses = () => {
   } = AccountForm;
   const [transacDailog, setTransacDailog] = useState(false);
   const [accDailog, setAccDailog] = useState(false);
-  const [isAccEditable, setIsAccEditable] = useState(false);
+  const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [accDltConf, setAccDltConf] = useState(false);
   const [delAccName, setDelAccName] = useState("");
-  const [accId, setAccId] = useState("");
+  const [selectedId, setSelectedId] = useState("");
   const [transacList, setTransacList] = useState([]);
   const [accList, setAccList] = useState([]);
   const [catList, setCatList] = useState([]);
   const [balList, setBalList] = useState({});
-  const { handleAdd, handleDelete, loading, apiError, apiData } = useAcc();
-  const { addTran, getTranList, tranLoading, tranApiData, tranApiError } =
-    useTransac();
+  const { handleAdd, handleDelete, loading } = useAcc();
+  const { addTran, getTranList, tranLoading } = useTransac();
 
+  // Helpers
+  const refreshData = async () => {
+    const result = await getTranList();
+    if (!result.success) {
+      toast.error(result.message || "Failed to fetch transactions", {
+        id: "fetch-tran-error",
+      });
+
+      return;
+    }
+    const {
+      transacList = [],
+      accList = [],
+      catList = [],
+      balList = {},
+    } = result.data || {};
+    setTransacList(transacList);
+    setAccList(accList);
+    setCatList(catList);
+    setBalList(balList);
+  };
+  const resetAccountForm = () => {
+    AccountForm.reset({
+      accName: "",
+      accAmount: "",
+    });
+    setIsEditingAccount(false);
+    setSelectedId("");
+  };
+  const resetDeleteAccount = () => {
+    setDelAccName("");
+    setSelectedId("");
+  };
+
+  // Effects
+  useEffect(() => {
+    refreshData();
+  }, []);
+
+  // Handlers
   const handleAddTransaction = async (data) => {
-    console.log("data: ", data);
     const bal = rupeesToPaise(data.amount);
     const date = data.transDate ? data.transDate.getTime() : null;
     const tranDet = {
       transDate: date,
       transAmount: bal,
-      transType: data.trnasType,
+      transType: data.transType,
       transAccount: data.transAcc,
       transCategory: data.transCategory,
       transMethod: data.transPayMethod,
@@ -136,7 +172,27 @@ const Expenses = () => {
       transDesc: data.transDesc,
       transNotes: data.transNote,
     };
-    await addTran(tranDet);
+    const result = await addTran(tranDet);
+    if (!result.success) {
+      toast.error(result.message, { id: "add-tran-error" });
+      return;
+    }
+    toast.success(result.message, { id: "add-tran-success" });
+    setTransacDailog(false);
+    transacForm.reset();
+    await refreshData();
+  };
+  const handleTranDel = async () => {
+    // const result = await handleDelete(selectedId);
+    return;
+    if (!result.success) {
+      toast.error(result.message, { id: "del-acc-error" });
+      return;
+    }
+    toast.success(result.message, { id: "del-acc-success" });
+    setAccDltConf(false);
+    resetDeleteAccount();
+    await refreshData();
   };
   const handleAddAccount = async (data) => {
     const bal = rupeesToPaise(data.accAmount);
@@ -145,85 +201,67 @@ const Expenses = () => {
       accBalance: bal,
       isActive: true,
     };
-    if (isAccEditable) {
-      accData.accId = accId;
+    if (isEditingAccount) {
+      accData.accId = selectedId;
     }
-    await handleAdd(accData);
+    const result = await handleAdd(accData);
+    if (!result.success) {
+      toast.error(result.message, { id: "add-acc-error" });
+      return;
+    }
+    toast.success(result.message, { id: "add-acc-success" });
+    setAccDailog(false);
+    resetAccountForm();
+    await refreshData();
   };
-  const handleAccDel = async () => {
-    await handleDelete(accId);
-  };
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      await getTranList();
-    };
-    fetchTransactions();
-  }, []);
-  useEffect(() => {
-    if (!tranApiData) return;
-    if (tranApiData.success) {
-      toast.success(tranApiData.message);
-      setTransacList(tranApiData?.data?.transacList || []);
-      setAccList(tranApiData?.data?.accList || []);
-      setCatList(tranApiData?.data?.catList || []);
-      setBalList(tranApiData?.data?.balList || {});
-    }
-  }, [tranApiData]);
-  useEffect(() => {
-    if (!tranApiError) return;
-    toast.error(tranApiError.message);
-  }, [tranApiError]);
-  useEffect(() => {
-    if (!apiData) return;
-    if (apiData.success) {
-      toast.success(apiData.message);
-      setAccDailog(false);
-      setAccDltConf(false);
-      setIsAccEditable(false);
-      setAccId("");
-      setDelAccName("");
-      AccountForm.reset({
-        accName: "",
-        accAmount: "",
-      });
-      window.location.reload();
-    }
-  }, [apiData]);
-  useEffect(() => {
-    if (!apiError) return;
-    toast.error(apiError.message);
-  }, [apiError]);
   const handleAccEdit = (data) => {
     const bal = paiseToRupees(data.balance);
     AccountForm.reset({
       accName: data.name,
       accAmount: bal,
     });
-    setIsAccEditable(true);
-    setAccId(data._id);
+    setIsEditingAccount(true);
+    setSelectedId(data._id);
+  };
+  const handleAccDel = async () => {
+    const result = await handleDelete(selectedId);
+    if (!result.success) {
+      toast.error(result.message, { id: "del-tran-error" });
+      return;
+    }
+    toast.success(result.message, { id: "del-tran-success" });
+    setAccDailog(false);
+    setAccDltConf(false);
+    resetAccountForm();
+    resetDeleteAccount();
+    await refreshData();
+  };
+  const handleTranDailogChange = (isOpen) => {
+    setTransacDailog(isOpen);
+    if (!isOpen) {
+      transacForm.reset();
+    }
   };
   const handleAccDailogChange = (isOpen) => {
     setAccDailog(isOpen);
     if (!isOpen) {
-      AccountForm.reset({
-        accName: "",
-        accAmount: "",
-      });
-      setIsAccEditable(false);
-      setAccId("");
+      resetAccountForm();
     }
-  };
-  const handleAccDelete = (data) => {
-    setDelAccName(data.name);
-    setAccId(data._id);
-    setAccDltConf(true);
   };
   const handleAccDltAlert = (isOpen) => {
     setAccDltConf(isOpen);
     if (!isOpen) {
-      setDelAccName("");
-      setAccId("");
+      resetDeleteAccount();
     }
+  };
+  const handleAccDelete = (data) => {
+    setDelAccName(data.name);
+    setSelectedId(data._id);
+    setAccDltConf(true);
+  };
+  const handleTranDelete = (data) => {
+    setSelectedId(data._id);
+    setAccDltConf(true);
   };
   if (loading || tranLoading) {
     return <LoadingScreen />;
@@ -310,14 +348,26 @@ const Expenses = () => {
         </MotionButton>
       </div>
       <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <CardLayout className="flex flex-1 gap-6 p-1 lg:p-2.5 bg-primary/10 border-primary/30">
+          <Item>
+            <ItemContent>
+              <ItemTitle className="text-md md:text-xl text-primary">
+                Total Balance
+              </ItemTitle>
+              <ItemDescription className="text-xl md:text-3xl font-bold">
+                {formatCurrency(balList?.totalBalance || 0)}
+              </ItemDescription>
+            </ItemContent>
+          </Item>
+        </CardLayout>
         <CardLayout className="flex flex-1 gap-6 p-0 lg:p-2.5 bg-success/10 border-success/30">
           <Item>
             <ItemContent>
               <ItemTitle className="text-md md:text-xl text-success">
-                Total Balance
+                Total Earnings
               </ItemTitle>
               <ItemDescription className="text-xl md:text-3xl font-bold">
-                {formatCurrency(balList.totalBalance)}
+                {formatCurrency(balList?.totalCredit || 0)}
               </ItemDescription>
             </ItemContent>
           </Item>
@@ -329,19 +379,7 @@ const Expenses = () => {
                 Total Expenses
               </ItemTitle>
               <ItemDescription className="text-xl md:text-3xl font-bold">
-                {formatCurrency(balList.totalExpense)}
-              </ItemDescription>
-            </ItemContent>
-          </Item>
-        </CardLayout>
-        <CardLayout className="flex flex-1 gap-6 p-1 lg:p-2.5 bg-primary/10 border-primary/30">
-          <Item>
-            <ItemContent>
-              <ItemTitle className="text-md md:text-xl text-primary">
-                Net Amount
-              </ItemTitle>
-              <ItemDescription className="text-xl md:text-3xl font-bold">
-                {formatCurrency(45680)}
+                {formatCurrency(balList?.totalDebit || 0)}
               </ItemDescription>
             </ItemContent>
           </Item>
@@ -379,8 +417,10 @@ const Expenses = () => {
                 <TableCell>{transac.categoryId.name}</TableCell>
                 <TableCell>{payMethod[transac.paymentMethod]}</TableCell>
                 <TableCell>{transac.merchantName}</TableCell>
-                <TableCell>{transac.description}</TableCell>
-                <TableCell>{transac.notes}</TableCell>
+                <TableCell>{transac?.description || "-"}</TableCell>
+                <TableCell className="max-w-50 overflow-hidden text-ellipsis">
+                  {transac?.notes || "-"}
+                </TableCell>
                 <TableCell className="flex justify-around">
                   <MotionButton
                     // onClick={() => handleAccEdit(acc)}
@@ -391,7 +431,7 @@ const Expenses = () => {
                     <EditIcon />
                   </MotionButton>
                   <MotionButton
-                    // onClick={() => handleAccDelete(acc)}
+                    onClick={() => handleTranDelete(transac)}
                     type="button"
                     variant="ghost"
                     className="p-0"
@@ -446,7 +486,7 @@ const Expenses = () => {
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-      <Dialog open={transacDailog} onOpenChange={setTransacDailog}>
+      <Dialog open={transacDailog} onOpenChange={handleTranDailogChange}>
         <DialogContent className="sm:max-w-[60%] xl:max-w-[40%]">
           <form onSubmit={handleSubmit(handleAddTransaction)}>
             <DialogHeader>
@@ -512,7 +552,7 @@ const Expenses = () => {
                 )}
               </Field>
               <Controller
-                name="trnasType"
+                name="transType"
                 control={control}
                 rules={{
                   required: "Please Select",
@@ -810,7 +850,7 @@ const Expenses = () => {
                   min="0"
                   placeholder="Initial Balance"
                   autoComplete="off"
-                  disabled={isAccEditable}
+                  disabled={isEditingAccount}
                   className="w-full sm:max-w-60"
                   aria-invalid={!!accFormState.errors.accAmount}
                   {...accRegister("accAmount", {
@@ -841,7 +881,7 @@ const Expenses = () => {
                 </MotionButton>
               </DialogClose>
               <MotionButton type="submit" size="lg">
-                {isAccEditable ? <>Update</> : <>Add</>}
+                {isEditingAccount ? <>Update</> : <>Add</>}
               </MotionButton>
             </DialogFooter>
           </form>
@@ -853,12 +893,15 @@ const Expenses = () => {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete your{" "}
-              {delAccName} account from our servers.
+              {delAccName ? `${delAccName} account` : "selected transaction"}{" "}
+              from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleAccDel}>
+            <AlertDialogAction
+              onClick={delAccName ? handleAccDel : handleTranDel}
+            >
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>

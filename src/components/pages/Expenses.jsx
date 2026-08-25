@@ -116,7 +116,7 @@ const Expenses = () => {
   const [catList, setCatList] = useState([]);
   const [balList, setBalList] = useState({});
   const { handleAdd, handleDelete, loading } = useAcc();
-  const { addTran, getTranList, tranLoading } = useTransac();
+  const { addTran, getTranList, delTran, tranLoading } = useTransac();
 
   // Helpers
   const refreshData = async () => {
@@ -183,8 +183,7 @@ const Expenses = () => {
     await refreshData();
   };
   const handleTranDel = async () => {
-    // const result = await handleDelete(selectedId);
-    return;
+    const result = await delTran(selectedId);
     if (!result.success) {
       toast.error(result.message, { id: "del-acc-error" });
       return;

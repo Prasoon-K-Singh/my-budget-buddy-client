@@ -23,3 +23,12 @@ export async function tranList() {
     throw err;
   }
 }
+
+export async function tranDel(payload) {
+  try {
+    const response = await api.post(`/delete/${payload}`);
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+}

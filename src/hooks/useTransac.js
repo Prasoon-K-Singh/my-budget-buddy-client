@@ -1,4 +1,4 @@
-import { tranAdd, tranList, tranDel } from "@/services/transacApi";
+import { tranAdd, tranList, tranDel, tranEdit } from "@/services/transacApi";
 import { useState } from "react";
 
 export const useTransac = () => {
@@ -51,5 +51,21 @@ export const useTransac = () => {
       setLoading(false);
     }
   };
-  return { addTran, getTranList, delTran, tranLoading };
+  const editTran = async (id, payload) => {
+    setLoading(true);
+    try {
+      const data = await tranEdit(id, payload);
+      return data;
+    } catch (err) {
+      return (
+        err?.response?.data || {
+          success: false,
+          message: "Something went wrong",
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  return { addTran, getTranList, delTran, editTran, tranLoading };
 };

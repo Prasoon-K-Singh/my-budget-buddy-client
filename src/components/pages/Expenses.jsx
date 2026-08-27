@@ -142,7 +142,7 @@ const Expenses = () => {
   };
   const resetTransacForm = () => {
     transacForm.reset({
-      transDate: {},
+      transDate: "",
       amount: "",
       transType: "",
       transAcc: "",
@@ -759,6 +759,8 @@ const Expenses = () => {
                   aria-invalid={!!formState.errors.merchant}
                   {...register("merchant", {
                     required: "Merchant Name is required",
+                    validate: (value) =>
+                      value.trim() !== "" || "Please enter valid name",
                   })}
                 />
                 {formState.errors.merchant && (

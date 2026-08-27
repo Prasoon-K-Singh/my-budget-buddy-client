@@ -32,3 +32,12 @@ export async function tranDel(payload) {
     throw err;
   }
 }
+
+export async function tranEdit(id, payload) {
+  try {
+    const response = await api.post(`/edit/${id}`, payload);
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+}

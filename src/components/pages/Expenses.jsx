@@ -108,6 +108,7 @@ const Expenses = () => {
   const [transacDailog, setTransacDailog] = useState(false);
   const [accDailog, setAccDailog] = useState(false);
   const [isEditingAccount, setIsEditingAccount] = useState(false);
+  const [isEditingTransac, setIsEditingTransac] = useState(false);
   const [accDltConf, setAccDltConf] = useState(false);
   const [delAccName, setDelAccName] = useState("");
   const [selectedId, setSelectedId] = useState("");
@@ -116,7 +117,7 @@ const Expenses = () => {
   const [catList, setCatList] = useState([]);
   const [balList, setBalList] = useState({});
   const { handleAdd, handleDelete, loading } = useAcc();
-  const { addTran, getTranList, delTran, tranLoading } = useTransac();
+  const { addTran, getTranList, delTran, editTran, tranLoading } = useTransac();
 
   // Helpers
   const refreshData = async () => {
@@ -139,6 +140,21 @@ const Expenses = () => {
     setCatList(catList);
     setBalList(balList);
   };
+  const resetTransacForm = () => {
+    transacForm.reset({
+      transDate: {},
+      amount: "",
+      transType: "",
+      transAcc: "",
+      transCategory: "",
+      transPayMethod: "",
+      merchant: "",
+      transDesc: "",
+      transNote: "",
+    });
+    setIsEditingTransac(false);
+    setSelectedId("");
+  };
   const resetAccountForm = () => {
     AccountForm.reset({
       accName: "",
@@ -159,6 +175,7 @@ const Expenses = () => {
 
   // Handlers
   const handleAddTransaction = async (data) => {
+    let result;
     const bal = rupeesToPaise(data.amount);
     const date = data.transDate ? data.transDate.getTime() : null;
     const tranDet = {
@@ -172,14 +189,18 @@ const Expenses = () => {
       transDesc: data.transDesc,
       transNotes: data.transNote,
     };
-    const result = await addTran(tranDet);
+    if (isEditingTransac) {
+      result = await editTran(selectedId, tranDet);
+    } else {
+      result = await addTran(tranDet);
+    }
     if (!result.success) {
       toast.error(result.message, { id: "add-tran-error" });
       return;
     }
     toast.success(result.message, { id: "add-tran-success" });
     setTransacDailog(false);
-    transacForm.reset();
+    resetTransacForm();
     await refreshData();
   };
   const handleTranDel = async () => {
@@ -222,6 +243,22 @@ const Expenses = () => {
     setIsEditingAccount(true);
     setSelectedId(data._id);
   };
+  const handleTransacEdit = (data) => {
+    setTransacDailog(true);
+    setIsEditingTransac(true);
+    setSelectedId(data._id);
+    transacForm.reset({
+      transDate: new Date(data?.transactionDate || {}),
+      amount: data?.amount / 100 || 0,
+      transType: data?.type || "",
+      transAcc: data?.accountId?._id || "",
+      transCategory: data?.categoryId?._id || "",
+      transPayMethod: data?.paymentMethod || "",
+      merchant: data?.merchantName || "",
+      transDesc: data?.description || "",
+      transNote: data?.notes || "",
+    });
+  };
   const handleAccDel = async () => {
     const result = await handleDelete(selectedId);
     if (!result.success) {
@@ -238,7 +275,7 @@ const Expenses = () => {
   const handleTranDailogChange = (isOpen) => {
     setTransacDailog(isOpen);
     if (!isOpen) {
-      transacForm.reset();
+      resetTransacForm();
     }
   };
   const handleAccDailogChange = (isOpen) => {
@@ -410,19 +447,29 @@ const Expenses = () => {
                 <TableCell>
                   {format(new Date(transac.transactionDate), "dd/MM/yyyy")}
                 </TableCell>
-                <TableCell>{formatCurrency(transac.amount)}</TableCell>
-                <TableCell>{transType[transac.type]}</TableCell>
-                <TableCell>{transac.accountId.name}</TableCell>
-                <TableCell>{transac.categoryId.name}</TableCell>
-                <TableCell>{payMethod[transac.paymentMethod]}</TableCell>
-                <TableCell>{transac.merchantName}</TableCell>
+                <TableCell>
+                  {transac?.amount
+                    ? formatCurrency(transac.amount)
+                    : formatCurrency(0)}
+                </TableCell>
+                <TableCell>
+                  {transac.type ? transType[transac.type] : "-"}
+                </TableCell>
+                <TableCell>{transac?.accountId?.name || "-"}</TableCell>
+                <TableCell>{transac?.categoryId?.name || "-"}</TableCell>
+                <TableCell>
+                  {transac?.paymentMethod
+                    ? payMethod[transac.paymentMethod]
+                    : "-"}
+                </TableCell>
+                <TableCell>{transac?.merchantName || "-"}</TableCell>
                 <TableCell>{transac?.description || "-"}</TableCell>
                 <TableCell className="max-w-50 overflow-hidden text-ellipsis">
                   {transac?.notes || "-"}
                 </TableCell>
                 <TableCell className="flex justify-around">
                   <MotionButton
-                    // onClick={() => handleAccEdit(acc)}
+                    onClick={() => handleTransacEdit(transac)}
                     type="button"
                     variant="ghost"
                     className="p-0"
@@ -745,7 +792,7 @@ const Expenses = () => {
                 </MotionButton>
               </DialogClose>
               <MotionButton type="submit" size="lg">
-                Add
+                {isEditingTransac ? "Update" : "Add"}
               </MotionButton>
             </DialogFooter>
           </form>

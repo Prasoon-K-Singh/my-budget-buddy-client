@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NavLink, Link } from "react-router";
 import { LogOut, UserRound } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { navItem } from "@/config/config";
+import { NAV_ITEM } from "@/config/config";
 import MobileMenu from "@/components/common/MobileMenu";
 
 const Topbar = () => {
@@ -35,7 +35,7 @@ const Topbar = () => {
         <div className="hidden lg:flex gap-8 px-4 py-2 bg-primary/80 rounded-4xl">
           <NavigationMenu>
             <NavigationMenuList>
-              {navItem.map((nav) => {
+              {NAV_ITEM.map((nav) => {
                 return (
                   <NavigationMenuItem key={nav.link}>
                     <NavLink

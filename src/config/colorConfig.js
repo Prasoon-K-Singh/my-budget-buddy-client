@@ -1,4 +1,4 @@
-export const AccListColors = [
+export const ACC_LIST_COLORS = [
   {
     bg: "bg-chart-1/10",
     border: "border-chart-1/30",

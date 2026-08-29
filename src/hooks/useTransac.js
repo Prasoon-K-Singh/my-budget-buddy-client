@@ -19,10 +19,10 @@ export const useTransac = () => {
       setLoading(false);
     }
   };
-  const getTranList = async () => {
+  const getTranList = async (payload) => {
     setLoading(true);
     try {
-      const data = await tranList();
+      const data = await tranList(payload);
       return data;
     } catch (err) {
       return (

@@ -81,8 +81,8 @@ import LoadingScreen from "@/components/common/LoadingScreen";
 import DatePickerWithRange from "@/components/common/DatePickerWithRange";
 import MotionButton from "@/components/motionUI/MotionButton";
 import { toast } from "sonner";
-import { AccListColors } from "@/config/colorConfig";
-import { payMethod, transType } from "@/config/config";
+import { ACC_LIST_COLORS } from "@/config/colorConfig";
+import { LIST_LIMIT, PAY_METHOD, TRANS_TYPE } from "@/config/config";
 import { useAcc } from "@/hooks/useAcc";
 import { useTransac } from "@/hooks/useTransac";
 import { formatTransactionNo } from "@/lib/utils";
@@ -116,17 +116,32 @@ const Expenses = () => {
   const [accList, setAccList] = useState([]);
   const [catList, setCatList] = useState([]);
   const [balList, setBalList] = useState({});
+  const [pagination, setPagination] = useState({});
+  const [page, setPage] = useState(1);
+  const [accountFilter, setAccountFilter] = useState({
+    _id: "all-acc",
+    name: "All Account",
+  });
+  const [categoryFilter, setCategoryFilter] = useState({
+    _id: "all-cate",
+    name: "All Category",
+  });
+  const [methodFilter, setMethodFilter] = useState("all-method");
+  const [typeFilter, setTypeFilter] = useState("all-type");
   const { handleAdd, handleDelete, loading } = useAcc();
   const { addTran, getTranList, delTran, editTran, tranLoading } = useTransac();
 
   // Helpers
   const refreshData = async () => {
-    const result = await getTranList();
+    const payload = {
+      page,
+      limit: LIST_LIMIT,
+    };
+    const result = await getTranList(payload);
     if (!result.success) {
       toast.error(result.message || "Failed to fetch transactions", {
         id: "fetch-tran-error",
       });
-
       return;
     }
     const {
@@ -134,11 +149,13 @@ const Expenses = () => {
       accList = [],
       catList = [],
       balList = {},
+      pagination = {},
     } = result.data || {};
     setTransacList(transacList);
     setAccList(accList);
     setCatList(catList);
     setBalList(balList);
+    setPagination(pagination);
   };
   const resetTransacForm = () => {
     transacForm.reset({
@@ -171,7 +188,7 @@ const Expenses = () => {
   // Effects
   useEffect(() => {
     refreshData();
-  }, []);
+  }, [page]);
 
   // Handlers
   const handleAddTransaction = async (data) => {
@@ -299,6 +316,33 @@ const Expenses = () => {
     setSelectedId(data._id);
     setAccDltConf(true);
   };
+  const getPageNumbers = (currentPage, totalPages) => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4, "...", totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [
+        1,
+        "...",
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
+    }
+    return [
+      1,
+      "...",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "...",
+      totalPages,
+    ];
+  };
   if (loading || tranLoading) {
     return <LoadingScreen />;
   }
@@ -315,14 +359,21 @@ const Expenses = () => {
               size="filter"
               buttonConfig="dropdown"
             >
-              <span>All Types</span>
+              <span>{accountFilter.name}</span>
               <ChevronDown className="h-4 w-4" />
             </MotionButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">Types</div>
-            </DropdownMenuItem>
+            {accList?.map((acc) => (
+              <DropdownMenuItem
+                key={acc._id}
+                value={acc._id}
+                onClick={() => setAccountFilter(acc)}
+                className="flex items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-2">{acc.name}</div>
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu className="col-span-1">
@@ -332,14 +383,21 @@ const Expenses = () => {
               size="filter"
               buttonConfig="dropdown"
             >
-              <span>All Categories</span>
+              <span>{categoryFilter.name}</span>
               <ChevronDown className="h-4 w-4" />
             </MotionButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">Types</div>
-            </DropdownMenuItem>
+            {catList?.map((cat) => (
+              <DropdownMenuItem
+                key={cat._id}
+                value={cat._id}
+                onClick={() => setCategoryFilter(cat)}
+                className="flex items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-2">{cat.name}</div>
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu className="col-span-1">
@@ -349,14 +407,68 @@ const Expenses = () => {
               size="filter"
               buttonConfig="dropdown"
             >
-              <span>All Accounts</span>
+              <span>
+                {methodFilter === "all-method"
+                  ? "All Method"
+                  : PAY_METHOD[methodFilter]}
+              </span>
               <ChevronDown className="h-4 w-4" />
             </MotionButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">Types</div>
+            <DropdownMenuItem
+              value="all-method"
+              onClick={() => setMethodFilter("all-method")}
+              className="flex items-center justify-between gap-4"
+            >
+              All Method
             </DropdownMenuItem>
+            {Object.entries(PAY_METHOD).map(([value, label]) => (
+              <DropdownMenuItem
+                key={value}
+                value={value}
+                onClick={() => setMethodFilter(value)}
+                className="flex items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-2">{label}</div>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu className="col-span-1">
+          <DropdownMenuTrigger asChild>
+            <MotionButton
+              variant="secondary"
+              size="filter"
+              buttonConfig="dropdown"
+            >
+              <span>
+                {typeFilter === "all-type"
+                  ? "All Type"
+                  : TRANS_TYPE[typeFilter]}
+              </span>
+              <ChevronDown className="h-4 w-4" />
+            </MotionButton>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              value="all-type"
+              onClick={() => setTypeFilter("all-type")}
+              className="flex items-center justify-between gap-4"
+            >
+              All Type
+            </DropdownMenuItem>
+            {Object.entries(TRANS_TYPE).map(([value, label]) => (
+              <DropdownMenuItem
+                key={value}
+                value={value}
+                onClick={() => setTypeFilter(value)}
+                className="flex items-center justify-between gap-4"
+              >
+                {label}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
         <div className="col-span-1 md:col-span-2">
@@ -367,10 +479,30 @@ const Expenses = () => {
           size="filter"
           className="col-span-1 justify-center"
           onClick={() => {
+            // setAccDailog(true);
+          }}
+        >
+          Reset
+        </MotionButton>
+        <MotionButton
+          variant="outline"
+          size="filter"
+          className="col-span-1 justify-center"
+          onClick={() => {
+            // setAccDailog(true);
+          }}
+        >
+          Search
+        </MotionButton>
+        <MotionButton
+          variant="outline"
+          size="filter"
+          className="col-span-1 justify-center"
+          onClick={() => {
             setAccDailog(true);
           }}
         >
-          Add Account
+          Configure Account
         </MotionButton>
         <MotionButton
           variant="outline"
@@ -427,10 +559,10 @@ const Expenses = () => {
             <TableHead>ID</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Amount</TableHead>
-            <TableHead>Type</TableHead>
             <TableHead>Account</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Method</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>Merchant</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Note</TableHead>
@@ -452,15 +584,15 @@ const Expenses = () => {
                     ? formatCurrency(transac.amount)
                     : formatCurrency(0)}
                 </TableCell>
-                <TableCell>
-                  {transac.type ? transType[transac.type] : "-"}
-                </TableCell>
                 <TableCell>{transac?.accountId?.name || "-"}</TableCell>
                 <TableCell>{transac?.categoryId?.name || "-"}</TableCell>
                 <TableCell>
                   {transac?.paymentMethod
-                    ? payMethod[transac.paymentMethod]
+                    ? PAY_METHOD[transac.paymentMethod]
                     : "-"}
+                </TableCell>
+                <TableCell className="text-destructive">
+                  {transac.type ? TRANS_TYPE[transac.type] : "-"}
                 </TableCell>
                 <TableCell>{transac?.merchantName || "-"}</TableCell>
                 <TableCell>{transac?.description || "-"}</TableCell>
@@ -474,7 +606,7 @@ const Expenses = () => {
                     variant="ghost"
                     className="p-0"
                   >
-                    <EditIcon />
+                    <EditIcon color="var(--primary)" />
                   </MotionButton>
                   <MotionButton
                     onClick={() => handleTranDelete(transac)}
@@ -482,7 +614,7 @@ const Expenses = () => {
                     variant="ghost"
                     className="p-0"
                   >
-                    <Trash2Icon />
+                    <Trash2Icon color="var(--destructive)" />
                   </MotionButton>
                 </TableCell>
               </TableRow>
@@ -511,24 +643,52 @@ const Expenses = () => {
       <Pagination className="py-3.5 bg-muted border rounded-b-lg shadow-2xl relative z-10">
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious href="#" />
+            <PaginationPrevious
+              onClick={(e) => {
+                e.preventDefault();
+                if (page > 1) {
+                  setPage(page - 1);
+                }
+              }}
+              className={
+                page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+              }
+            />
           </PaginationItem>
+          {getPageNumbers(page, pagination.totalPages).map(
+            (pageNumber, index) => (
+              <PaginationItem key={index}>
+                {pageNumber === "..." ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    isActive={pageNumber === page}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage(pageNumber);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ),
+          )}
           <PaginationItem>
-            <PaginationLink href="#">1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#" isActive>
-              2
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
+            <PaginationNext
+              onClick={(e) => {
+                e.preventDefault();
+                if (page < pagination.totalPages) {
+                  setPage(page + 1);
+                }
+              }}
+              className={
+                page === pagination.totalPages
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer"
+              }
+            />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
@@ -622,7 +782,7 @@ const Expenses = () => {
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectGroup>
-                          {Object.entries(transType).map(([value, label]) => (
+                          {Object.entries(TRANS_TYPE).map(([value, label]) => (
                             <SelectItem key={value} value={value}>
                               {label}
                             </SelectItem>
@@ -735,7 +895,7 @@ const Expenses = () => {
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectGroup>
-                          {Object.entries(payMethod).map(([value, label]) => (
+                          {Object.entries(PAY_METHOD).map(([value, label]) => (
                             <SelectItem key={value} value={value}>
                               {label}
                             </SelectItem>
@@ -817,7 +977,8 @@ const Expenses = () => {
             {accList.length > 0 ? (
               <div className="grid lg:grid-cols-2 gap-4 p-4 max-h-[30vh] overflow-y-auto">
                 {accList?.map((acc, index) => {
-                  const listColor = AccListColors[index % AccListColors.length];
+                  const listColor =
+                    ACC_LIST_COLORS[index % ACC_LIST_COLORS.length];
                   return (
                     <CardLayout
                       key={acc._id}
@@ -835,20 +996,20 @@ const Expenses = () => {
                         </ItemContent>
                         <ItemActions>
                           <MotionButton
-                            onClick={() => handleAccDelete(acc)}
-                            type="button"
-                            variant="ghost"
-                            className="p-0"
-                          >
-                            <Trash2Icon />
-                          </MotionButton>
-                          <MotionButton
                             onClick={() => handleAccEdit(acc)}
                             type="button"
                             variant="ghost"
                             className="p-0"
                           >
-                            <EditIcon />
+                            <EditIcon color="var(--primary)" />
+                          </MotionButton>
+                          <MotionButton
+                            onClick={() => handleAccDelete(acc)}
+                            type="button"
+                            variant="ghost"
+                            className="p-0"
+                          >
+                            <Trash2Icon color="var(--destructive)" />
                           </MotionButton>
                         </ItemActions>
                       </Item>

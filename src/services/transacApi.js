@@ -1,8 +1,8 @@
-import { apiUrl } from "@/config/config";
+import { API_URL } from "@/config/config";
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: apiUrl.tranUrl,
+  baseURL: API_URL.tranUrl,
   withCredentials: true,
 });
 
@@ -15,9 +15,11 @@ export async function tranAdd(payload) {
   }
 }
 
-export async function tranList() {
+export async function tranList(payload) {
   try {
-    const response = await api.get("/list");
+    const response = await api.get(
+      `/list?page=${payload?.page}&limit=${payload?.limit}`,
+    );
     return response.data;
   } catch (err) {
     throw err;

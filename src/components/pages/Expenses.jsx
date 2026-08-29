@@ -95,6 +95,7 @@ import {
   EditIcon,
   Trash2Icon,
 } from "lucide-react";
+const today = new Date();
 
 const Expenses = () => {
   const transacForm = useForm();
@@ -110,6 +111,7 @@ const Expenses = () => {
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isEditingTransac, setIsEditingTransac] = useState(false);
   const [accDltConf, setAccDltConf] = useState(false);
+  const [warningAlert, setWarningAlert] = useState(false);
   const [delAccName, setDelAccName] = useState("");
   const [selectedId, setSelectedId] = useState("");
   const [transacList, setTransacList] = useState([]);
@@ -118,16 +120,15 @@ const Expenses = () => {
   const [balList, setBalList] = useState({});
   const [pagination, setPagination] = useState({});
   const [page, setPage] = useState(1);
-  const [accountFilter, setAccountFilter] = useState({
-    _id: "all-acc",
-    name: "All Account",
+  const [dateRange, setDateRange] = useState({
+    from: new Date(today.getFullYear(), today.getMonth(), 1),
+    to: today,
   });
-  const [categoryFilter, setCategoryFilter] = useState({
-    _id: "all-cate",
-    name: "All Category",
-  });
+  const [accountFilter, setAccountFilter] = useState("all-acc");
+  const [categoryFilter, setCategoryFilter] = useState("all-cat");
   const [methodFilter, setMethodFilter] = useState("all-method");
   const [typeFilter, setTypeFilter] = useState("all-type");
+  const [refreshKey, setRefreshKey] = useState(0);
   const { handleAdd, handleDelete, loading } = useAcc();
   const { addTran, getTranList, delTran, editTran, tranLoading } = useTransac();
 
@@ -136,6 +137,12 @@ const Expenses = () => {
     const payload = {
       page,
       limit: LIST_LIMIT,
+      fromDate: dateRange?.from?.getTime(),
+      toDate: dateRange?.to?.getTime(),
+      ...(accountFilter !== "all-acc" && { account: accountFilter._id }),
+      ...(categoryFilter !== "all-cat" && { category: categoryFilter._id }),
+      ...(methodFilter !== "all-method" && { method: methodFilter }),
+      ...(typeFilter !== "all-type" && { type: typeFilter }),
     };
     const result = await getTranList(payload);
     if (!result.success) {
@@ -184,11 +191,21 @@ const Expenses = () => {
     setDelAccName("");
     setSelectedId("");
   };
+  const resetAllFilter = () => {
+    setDateRange({
+      from: new Date(today.getFullYear(), today.getMonth(), 1),
+      to: today,
+    });
+    setAccountFilter("all-acc");
+    setCategoryFilter("all-cat");
+    setMethodFilter("all-method");
+    setTypeFilter("all-type");
+  };
 
   // Effects
   useEffect(() => {
     refreshData();
-  }, [page]);
+  }, [page, refreshKey]);
 
   // Handlers
   const handleAddTransaction = async (data) => {
@@ -218,7 +235,7 @@ const Expenses = () => {
     toast.success(result.message, { id: "add-tran-success" });
     setTransacDailog(false);
     resetTransacForm();
-    await refreshData();
+    handleResetFilter();
   };
   const handleTranDel = async () => {
     const result = await delTran(selectedId);
@@ -229,7 +246,7 @@ const Expenses = () => {
     toast.success(result.message, { id: "del-acc-success" });
     setAccDltConf(false);
     resetDeleteAccount();
-    await refreshData();
+    handleResetFilter();
   };
   const handleAddAccount = async (data) => {
     const bal = rupeesToPaise(data.accAmount);
@@ -249,7 +266,7 @@ const Expenses = () => {
     toast.success(result.message, { id: "add-acc-success" });
     setAccDailog(false);
     resetAccountForm();
-    await refreshData();
+    handleResetFilter();
   };
   const handleAccEdit = (data) => {
     const bal = paiseToRupees(data.balance);
@@ -287,7 +304,7 @@ const Expenses = () => {
     setAccDltConf(false);
     resetAccountForm();
     resetDeleteAccount();
-    await refreshData();
+    handleResetFilter();
   };
   const handleTranDailogChange = (isOpen) => {
     setTransacDailog(isOpen);
@@ -343,6 +360,21 @@ const Expenses = () => {
       totalPages,
     ];
   };
+  const handleResetFilter = () => {
+    resetAllFilter();
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      setRefreshKey((prev) => prev + 1);
+    }
+  };
+  const handleSearch = () => {
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      setRefreshKey((prev) => prev + 1);
+    }
+  };
   if (loading || tranLoading) {
     return <LoadingScreen />;
   }
@@ -351,7 +383,7 @@ const Expenses = () => {
       title="Expenses"
       description="Monitor your daily spending effortlessly."
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-7 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
         <DropdownMenu className="col-span-1">
           <DropdownMenuTrigger asChild>
             <MotionButton
@@ -359,11 +391,22 @@ const Expenses = () => {
               size="filter"
               buttonConfig="dropdown"
             >
-              <span>{accountFilter.name}</span>
+              <span>
+                {accountFilter === "all-acc"
+                  ? "All Account"
+                  : accountFilter.name}
+              </span>
               <ChevronDown className="h-4 w-4" />
             </MotionButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              value="all-acc"
+              onClick={() => setAccountFilter("all-acc")}
+              className="flex items-center justify-between gap-4"
+            >
+              All Account
+            </DropdownMenuItem>
             {accList?.map((acc) => (
               <DropdownMenuItem
                 key={acc._id}
@@ -383,11 +426,22 @@ const Expenses = () => {
               size="filter"
               buttonConfig="dropdown"
             >
-              <span>{categoryFilter.name}</span>
+              <span>
+                {categoryFilter === "all-cat"
+                  ? "All Category"
+                  : categoryFilter.name}
+              </span>
               <ChevronDown className="h-4 w-4" />
             </MotionButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              value="all-cat"
+              onClick={() => setCategoryFilter("all-cat")}
+              className="flex items-center justify-between gap-4"
+            >
+              All Category
+            </DropdownMenuItem>
             {catList?.map((cat) => (
               <DropdownMenuItem
                 key={cat._id}
@@ -471,15 +525,15 @@ const Expenses = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <div className="col-span-1 md:col-span-2">
-          <DatePickerWithRange />
+        <div className="col-span-1 md:col-span-4 lg:col-span-2">
+          <DatePickerWithRange date={dateRange} setDate={setDateRange} />
         </div>
         <MotionButton
           variant="outline"
           size="filter"
           className="col-span-1 justify-center"
           onClick={() => {
-            // setAccDailog(true);
+            handleResetFilter();
           }}
         >
           Reset
@@ -489,7 +543,7 @@ const Expenses = () => {
           size="filter"
           className="col-span-1 justify-center"
           onClick={() => {
-            // setAccDailog(true);
+            handleSearch();
           }}
         >
           Search
@@ -502,14 +556,16 @@ const Expenses = () => {
             setAccDailog(true);
           }}
         >
-          Configure Account
+          Account Config
         </MotionButton>
         <MotionButton
           variant="outline"
           size="filter"
           className="col-span-1 justify-center"
           onClick={() => {
-            setTransacDailog(true);
+            accList.length === 0
+              ? setWarningAlert(true)
+              : setTransacDailog(true);
           }}
         >
           Add Transaction
@@ -591,7 +647,13 @@ const Expenses = () => {
                     ? PAY_METHOD[transac.paymentMethod]
                     : "-"}
                 </TableCell>
-                <TableCell className="text-destructive">
+                <TableCell
+                  className={
+                    transac.type === "debit"
+                      ? "text-destructive"
+                      : "text-success"
+                  }
+                >
                   {transac.type ? TRANS_TYPE[transac.type] : "-"}
                 </TableCell>
                 <TableCell>{transac?.merchantName || "-"}</TableCell>
@@ -1112,6 +1174,22 @@ const Expenses = () => {
               onClick={delAccName ? handleAccDel : handleTranDel}
             >
               Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={warningAlert} onOpenChange={setWarningAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Please Configure Account First!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please add atleast one account before adding any transaction.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setAccDailog(true)}>
+              Account Config
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

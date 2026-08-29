@@ -13,11 +13,11 @@ const today = new Date();
 const oneYearAgo = new Date(today);
 oneYearAgo.setFullYear(today.getFullYear() - 1);
 
-const DatePickerWithRange = ({ disabledBeforeDate = oneYearAgo }) => {
-  const [date, setDate] = useState({
-    from: new Date(today.getFullYear(), today.getMonth(), 1),
-    to: today,
-  });
+const DatePickerWithRange = ({
+  date,
+  setDate,
+  disabledBeforeDate = oneYearAgo,
+}) => {
   return (
     <Field className="w-full max-w-106">
       <Popover>

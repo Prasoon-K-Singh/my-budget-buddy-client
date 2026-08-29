@@ -17,9 +17,17 @@ export async function tranAdd(payload) {
 
 export async function tranList(payload) {
   try {
-    const response = await api.get(
-      `/list?page=${payload?.page}&limit=${payload?.limit}`,
-    );
+    const params = new URLSearchParams({
+      page: payload?.page || 1,
+      limit: payload?.limit || 10,
+      fromDate: payload?.fromDate || "",
+      toDate: payload?.toDate || "",
+      account: payload?.account || "",
+      category: payload?.category || "",
+      method: payload?.method || "",
+      type: payload?.type || "",
+    });
+    const response = await api.get(`/list?${params.toString()}`);
     return response.data;
   } catch (err) {
     throw err;

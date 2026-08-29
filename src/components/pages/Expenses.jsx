@@ -94,6 +94,9 @@ import {
   CloudAlertIcon,
   EditIcon,
   Trash2Icon,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
 const today = new Date();
 
@@ -573,7 +576,10 @@ const Expenses = () => {
       </div>
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <CardLayout className="flex flex-1 gap-6 p-1 lg:p-2.5 bg-primary/10 border-primary/30">
-          <Item>
+          <Item className="gap-x-4">
+            <div className="md:hidden xl:flex w-16 h-16 min-w-16 min-h-16 rounded-md bg-primary/15 flex justify-center items-center">
+              <Wallet color="var(--primary)" className="w-12 h-12" />
+            </div>
             <ItemContent>
               <ItemTitle className="text-md md:text-xl text-primary">
                 Total Balance
@@ -581,29 +587,44 @@ const Expenses = () => {
               <ItemDescription className="text-xl md:text-3xl font-bold">
                 {formatCurrency(balList?.totalBalance || 0)}
               </ItemDescription>
+              <ItemDescription className="text-sm">
+                Overall account balance
+              </ItemDescription>
             </ItemContent>
           </Item>
         </CardLayout>
         <CardLayout className="flex flex-1 gap-6 p-0 lg:p-2.5 bg-success/10 border-success/30">
-          <Item>
+          <Item className="gap-x-4">
+            <div className="md:hidden xl:flex w-16 h-16 min-w-16 min-h-16 rounded-md bg-success/15 flex justify-center items-center">
+              <TrendingUp color="var(--success)" className="w-12 h-12" />
+            </div>
             <ItemContent>
               <ItemTitle className="text-md md:text-xl text-success">
-                Total Earnings
+                Total Credit
               </ItemTitle>
               <ItemDescription className="text-xl md:text-3xl font-bold">
                 {formatCurrency(balList?.totalCredit || 0)}
+              </ItemDescription>
+              <ItemDescription className="text-sm">
+                Total credit in selected period
               </ItemDescription>
             </ItemContent>
           </Item>
         </CardLayout>
         <CardLayout className="flex flex-1 gap-6 p-1 lg:p-2.5 bg-destructive/10 border-destructive/30">
-          <Item>
+          <Item className="gap-x-4">
+            <div className="md:hidden xl:flex w-16 h-16 min-w-16 min-h-16 rounded-md bg-destructive/15 flex justify-center items-center">
+              <TrendingDown color="var(--destructive)" className="w-12 h-12" />
+            </div>
             <ItemContent>
               <ItemTitle className="text-md md:text-xl text-destructive">
-                Total Expenses
+                Total Debit
               </ItemTitle>
               <ItemDescription className="text-xl md:text-3xl font-bold">
                 {formatCurrency(balList?.totalDebit || 0)}
+              </ItemDescription>
+              <ItemDescription className="text-sm">
+                Total debit in selected period
               </ItemDescription>
             </ItemContent>
           </Item>

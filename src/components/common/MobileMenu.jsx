@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { navItem } from "@/config/config";
+import { NAV_ITEM } from "@/config/config";
 
 const MobileMenu = () => {
   return (
@@ -30,7 +30,7 @@ const MobileMenu = () => {
           </VisuallyHidden>
         </SheetHeader>
         <div className="mt-1 px-2 flex flex-col gap-1">
-          {navItem.map((nav) => {
+          {NAV_ITEM.map((nav) => {
             return (
               <NavLink
                 key={nav.link}

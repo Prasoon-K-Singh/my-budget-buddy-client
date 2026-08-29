@@ -1,6 +1,6 @@
 const backendDomain = "http://localhost:3000/api/";
 
-const navItem = [
+const NAV_ITEM = [
   {
     title: "Dashboard",
     link: "/dashboard",
@@ -23,23 +23,25 @@ const navItem = [
   },
 ];
 
-const apiUrl = {
+const API_URL = {
   authUrl: `${backendDomain}auth`,
   userUrl: `${backendDomain}user`,
   accUrl: `${backendDomain}acc`,
   tranUrl: `${backendDomain}tran`,
 };
 
-const transType = {
+const TRANS_TYPE = {
   debit: "Pay-out",
   credit: "Credit-in",
 };
 
-const payMethod = {
+const PAY_METHOD = {
   upi: "UPI",
   cash: "Cash",
   card: "Card",
   "net-bank": "Net Banking",
 };
 
-export { navItem, apiUrl, transType, payMethod };
+const LIST_LIMIT = 10;
+
+export { NAV_ITEM, API_URL, TRANS_TYPE, PAY_METHOD, LIST_LIMIT };

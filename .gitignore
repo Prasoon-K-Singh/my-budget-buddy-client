@@ -27,4 +27,5 @@ dist-ssr
 src/components/ui/sidebar.jsx
 src/components/ui/skeleton.jsx
 src/components/ui/tooltip.jsx
+src/components/ui/combobox.jsx
 src/hooks/use-mobile.js

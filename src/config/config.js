@@ -28,11 +28,22 @@ const API_URL = {
   userUrl: `${backendDomain}user`,
   accUrl: `${backendDomain}acc`,
   tranUrl: `${backendDomain}tran`,
+  catUrl: `${backendDomain}cat`,
 };
 
 const TRANS_TYPE = {
   debit: "Pay-out",
   credit: "Credit-in",
+};
+
+const STATUS = {
+  active: "Active",
+  inactive: "Inactive",
+};
+
+const YES_NO_SELECT = {
+  yes: "Yes",
+  no: "No",
 };
 
 const PAY_METHOD = {
@@ -44,4 +55,12 @@ const PAY_METHOD = {
 
 const LIST_LIMIT = 10;
 
-export { NAV_ITEM, API_URL, TRANS_TYPE, PAY_METHOD, LIST_LIMIT };
+export {
+  NAV_ITEM,
+  API_URL,
+  TRANS_TYPE,
+  STATUS,
+  YES_NO_SELECT,
+  PAY_METHOD,
+  LIST_LIMIT,
+};

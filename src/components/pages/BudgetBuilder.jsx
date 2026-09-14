@@ -67,6 +67,12 @@ const BudgetBuilder = () => {
   const [payloadData, setPayloadData] = useState({});
   const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [disableStatus, setDisableStatus] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 150);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     fetchBudget();
@@ -233,7 +239,7 @@ const BudgetBuilder = () => {
                     <div
                       className={cn(
                         "w-8 h-8 md:w-12 md:h-12 flex justify-between items-center rounded-full ",
-                        LABEL_COLORS[index % LABEL_COLORS.length],
+                        LABEL_COLORS[index % LABEL_COLORS.length].progress,
                       )}
                     >
                       <span className="flex-1 text-2xl md:text-3xl text-center font-bold">
@@ -254,11 +260,18 @@ const BudgetBuilder = () => {
                         <Progress
                           className="md:h-2"
                           value={
-                            category?.expensePercentage > 100
-                              ? 100
-                              : category?.expensePercentage || 0
+                            mounted
+                              ? category?.expensePercentage > 100
+                                ? 100
+                                : category?.expensePercentage || 0
+                              : 0
                           }
-                          color={LABEL_COLORS[index % LABEL_COLORS.length]}
+                          trackColor={
+                            LABEL_COLORS[index % LABEL_COLORS.length].track
+                          }
+                          color={
+                            LABEL_COLORS[index % LABEL_COLORS.length].progress
+                          }
                         />
                       </Field>
                     </ItemContent>

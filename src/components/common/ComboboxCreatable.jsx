@@ -36,7 +36,7 @@ const ComboboxCreatable = ({
   const [labels, setLabels] = useState(() =>
     options.map((option, index) => ({
       ...option,
-      color: option.color || LABEL_COLORS[index % LABEL_COLORS.length],
+      color: option.color || LABEL_COLORS[index % LABEL_COLORS.length].progress,
     })),
   );
   const [mounted, setMounted] = useState(false);
@@ -67,7 +67,8 @@ const ComboboxCreatable = ({
   const handleCreate = () => {
     const newValue = trimmed.toLowerCase().replace(/\s+/g, "-");
 
-    const color = LABEL_COLORS[colorIndexRef.current % LABEL_COLORS.length];
+    const color =
+      LABEL_COLORS[colorIndexRef.current % LABEL_COLORS.length].progress;
 
     colorIndexRef.current += 1;
 

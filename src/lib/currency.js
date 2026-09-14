@@ -12,3 +12,19 @@ export const rupeesToPaise = (amount) => {
 export const paiseToRupees = (amount) => {
   return amount / 100;
 };
+export const shortAmount = (amount) => {
+  amount = amount / 100;
+  if (amount >= 1_000_000_000) {
+    return `${(amount / 1_000_000_000).toFixed(2)}B`;
+  }
+
+  if (amount >= 1_000_000) {
+    return `${(amount / 1_000_000).toFixed(2)}M`;
+  }
+
+  if (amount >= 1_000) {
+    return `${(amount / 1_000).toFixed(2)}K`;
+  }
+
+  return Number(amount).toFixed(2).replace(/\.00$/, "");
+};

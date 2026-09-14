@@ -29,6 +29,7 @@ const API_URL = {
   accUrl: `${backendDomain}acc`,
   tranUrl: `${backendDomain}tran`,
   catUrl: `${backendDomain}cat`,
+  dashboardUrl: `${backendDomain}dashboard`,
 };
 
 const TRANS_TYPE = {

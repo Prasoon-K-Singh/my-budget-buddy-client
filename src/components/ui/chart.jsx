@@ -2,6 +2,7 @@ import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/currency";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = {
@@ -203,21 +204,22 @@ function ChartTooltipContent({
                     )}
                     <div
                       className={cn(
-                        "flex flex-1 justify-between leading-none",
+                        "flex flex-col gap-1 leading-none",
                         nestLabel ? "items-end" : "items-center",
                       )}
                     >
                       <div className="grid gap-1.5">
                         {nestLabel ? tooltipLabel : null}
                         <span className="text-muted-foreground">
-                          {itemConfig?.label ?? item.name}
+                          {item.name}
                         </span>
                       </div>
                       {item.value != null && (
                         <span className="font-mono font-medium text-foreground tabular-nums">
-                          {typeof item.value === "number"
+                          {/* {typeof item.value === "number"
                             ? item.value.toLocaleString()
-                            : String(item.value)}
+                            : String(item.value)} */}
+                          {formatCurrency(item.value, "INR")}
                         </span>
                       )}
                     </div>

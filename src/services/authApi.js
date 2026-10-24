@@ -11,7 +11,7 @@ export async function register(payload) {
     const response = await api.post("register", payload);
     return response.data;
   } catch (err) {
-    console.log("err: ", err);
+    throw err;
   }
 }
 
@@ -20,7 +20,7 @@ export async function login(payload) {
     const response = await api.post("login", payload);
     return response.data;
   } catch (err) {
-    console.log("err: ", err);
+    throw err;
   }
 }
 
@@ -28,6 +28,6 @@ export async function logout() {
   try {
     await api.get("logout");
   } catch (err) {
-    console.log("err: ", err);
+    throw err;
   }
 }

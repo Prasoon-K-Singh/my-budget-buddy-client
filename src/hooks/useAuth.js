@@ -11,8 +11,14 @@ export const useAuth = () => {
     try {
       const data = await register(payload);
       setUser(data.user);
+      return data;
     } catch (err) {
-      console.log("err: ", err);
+      return (
+        err?.response?.data || {
+          success: false,
+          message: "Something went wrong",
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -23,8 +29,14 @@ export const useAuth = () => {
     try {
       const data = await login(payload);
       setUser(data.user);
+      return data;
     } catch (err) {
-      console.log("err: ", err);
+      return (
+        err?.response?.data || {
+          success: false,
+          message: "Something went wrong",
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -36,7 +48,12 @@ export const useAuth = () => {
       await logout();
       setUser(null);
     } catch (err) {
-      console.log("err: ", err);
+      return (
+        err?.response?.data || {
+          success: false,
+          message: "Something went wrong",
+        }
+      );
     } finally {
       setLoading(false);
     }

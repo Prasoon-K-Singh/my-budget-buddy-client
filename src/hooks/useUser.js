@@ -26,8 +26,14 @@ export const useUser = () => {
     try {
       const data = await userUpdate(payload);
       setData(data);
+      return data;
     } catch (err) {
-      console.log("err: ", err);
+      return (
+        err?.response?.data || {
+          success: false,
+          message: "Something went wrong",
+        }
+      );
     } finally {
       setLoading(false);
     }

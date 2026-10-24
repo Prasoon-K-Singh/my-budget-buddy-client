@@ -103,14 +103,24 @@ const today = new Date();
 const Expenses = () => {
   const transacForm = useForm();
   const AccountForm = useForm();
+  const TransferForm = useForm();
   const { register, formState, control, handleSubmit } = transacForm;
   const {
     register: accRegister,
     formState: accFormState,
     handleSubmit: accHandleSubmit,
   } = AccountForm;
+  const {
+    register: transferRegister,
+    formState: transferFormState,
+    control: transferControl,
+    handleSubmit: transferHandleSubmit,
+    watch: transferWatch,
+    trigger: transferTrigger,
+  } = TransferForm;
   const [transacDailog, setTransacDailog] = useState(false);
   const [accDailog, setAccDailog] = useState(false);
+  const [selfTransferModal, setSelfTransferModal] = useState(false);
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isEditingTransac, setIsEditingTransac] = useState(false);
   const [accDltConf, setAccDltConf] = useState(false);
@@ -133,7 +143,8 @@ const Expenses = () => {
   const [typeFilter, setTypeFilter] = useState("all-type");
   const [refreshKey, setRefreshKey] = useState(0);
   const { handleAdd, handleDelete, loading } = useAcc();
-  const { addTran, getTranList, delTran, editTran, tranLoading } = useTransac();
+  const { addTran, selfTransfer, getTranList, delTran, editTran, tranLoading } =
+    useTransac();
 
   // Helpers
   const refreshData = async () => {
@@ -189,6 +200,13 @@ const Expenses = () => {
     });
     setIsEditingAccount(false);
     setSelectedId("");
+  };
+  const resetTransferForm = () => {
+    TransferForm.reset({
+      transferAmount: "",
+      transferFrom: "",
+      transferTo: "",
+    });
   };
   const resetDeleteAccount = () => {
     setDelAccName("");
@@ -271,6 +289,25 @@ const Expenses = () => {
     resetAccountForm();
     handleResetFilter();
   };
+  const handleTransfer = async (data) => {
+    let result;
+    const bal = rupeesToPaise(data.transferAmount);
+    const transferDet = {
+      transferFrom: data.transferFrom,
+      transferTo: data.transferTo,
+      transferBalance: bal,
+    };
+    result = await selfTransfer(transferDet);
+    if (!result.success) {
+      toast.error(result.message, { id: "self-transfer-error" });
+      return;
+    }
+    toast.success(result.message, { id: "self-transfer-success" });
+    setSelfTransferModal(false);
+    setAccDailog(false);
+    resetTransferForm();
+    refreshData();
+  };
   const handleAccEdit = (data) => {
     const bal = paiseToRupees(data.balance);
     AccountForm.reset({
@@ -319,6 +356,12 @@ const Expenses = () => {
     setAccDailog(isOpen);
     if (!isOpen) {
       resetAccountForm();
+    }
+  };
+  const handleSelfTransferModal = (isOpen) => {
+    setSelfTransferModal(isOpen);
+    if (!isOpen) {
+      resetTransferForm();
     }
   };
   const handleAccDltAlert = (isOpen) => {
@@ -378,6 +421,18 @@ const Expenses = () => {
       setRefreshKey((prev) => prev + 1);
     }
   };
+  const transferFrom = transferWatch("transferFrom");
+  const transferAmount = transferWatch("transferAmount");
+
+  useEffect(() => {
+    if (transferAmount !== undefined && transferAmount !== "") {
+      transferTrigger("transferAmount");
+    }
+  }, [transferFrom]);
+
+  const avlTransferBal = Number(
+    accList.find((acc) => acc._id === transferFrom)?.balance ?? 0,
+  );
   if (loading || tranLoading) {
     return <LoadingScreen />;
   }
@@ -1043,6 +1098,152 @@ const Expenses = () => {
           </form>
         </DialogContent>
       </Dialog>
+      <Dialog open={selfTransferModal} onOpenChange={handleSelfTransferModal}>
+        <DialogContent className="sm:max-w-[60%] xl:max-w-[40%]">
+          <form onSubmit={transferHandleSubmit(handleTransfer)}>
+            <DialogHeader>
+              <DialogTitle>Self Transfer</DialogTitle>
+              <DialogDescription>
+                Your self-transfer will be recorded and amount will be adjusted
+                accordingly but no transaction will be created for this
+                transfer. You can use this feature to transfer money between
+                your own accounts.
+              </DialogDescription>
+            </DialogHeader>
+            <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 p-4 max-h-[65vh] no-scrollbar overflow-y-auto">
+              <Controller
+                name="transferFrom"
+                control={transferControl}
+                rules={{
+                  required: "Please Select",
+                }}
+                render={({ field, fieldState }) => (
+                  <Field key={field.value}>
+                    <FieldLabel htmlFor={field.name}>Transfer From</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        className="w-full sm:max-w-60"
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectGroup>
+                          {accList
+                            .filter(
+                              (acc) => acc._id !== transferWatch("transferTo"),
+                            )
+                            .map((acc) => (
+                              <SelectItem key={acc._id} value={acc._id}>
+                                {acc.name}
+                              </SelectItem>
+                            ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="transferTo"
+                control={transferControl}
+                rules={{
+                  required: "Please Select",
+                }}
+                render={({ field, fieldState }) => (
+                  <Field key={field.value}>
+                    <FieldLabel htmlFor={field.name}>Transfer To</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        className="w-full sm:max-w-60"
+                        aria-invalid={fieldState.invalid}
+                      >
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectGroup>
+                          {accList
+                            .filter(
+                              (acc) =>
+                                acc._id !== transferWatch("transferFrom"),
+                            )
+                            .map((acc) => (
+                              <SelectItem key={acc._id} value={acc._id}>
+                                {acc.name}
+                              </SelectItem>
+                            ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Field>
+                <FieldLabel htmlFor="transferAmount">Amount</FieldLabel>
+                <Input
+                  id="transferAmount"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Amount"
+                  autoComplete="off"
+                  className="w-full sm:max-w-60"
+                  disabled={!transferWatch("transferFrom")}
+                  aria-invalid={!!transferFormState.errors.transferAmount}
+                  {...transferRegister("transferAmount", {
+                    required: "Amount is required",
+                    validate: {
+                      positive: (value) =>
+                        (Number(value) > 0 && Number.isFinite(Number(value))) ||
+                        "Amount must be greater than 0",
+
+                      sufficientBalance: (value) =>
+                        Number(value) <= avlTransferBal / 100 ||
+                        `Insufficient balance. Available: ₹${(avlTransferBal / 100).toFixed(2)}`,
+                    },
+                    onChange: (e) => {
+                      const value = e.target.value;
+                      if (!/^\d*\.?\d{0,2}$/.test(value)) {
+                        e.target.value = value.slice(0, -1);
+                      }
+                    },
+                  })}
+                />
+                {transferFormState.errors.transferAmount && (
+                  <FieldError
+                    errors={[transferFormState.errors.transferAmount]}
+                  />
+                )}
+              </Field>
+            </FieldGroup>
+            <DialogFooter>
+              <DialogClose asChild>
+                <MotionButton type="button" variant="outline" size="lg">
+                  Cancel
+                </MotionButton>
+              </DialogClose>
+              <MotionButton type="submit" size="lg">
+                Save
+              </MotionButton>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
       <Dialog open={accDailog} onOpenChange={handleAccDailogChange}>
         <DialogContent className="sm:max-w-[60%] xl:max-w-[40%]">
           <form onSubmit={accHandleSubmit(handleAddAccount)}>
@@ -1057,8 +1258,19 @@ const Expenses = () => {
             <div className="text-xl md:text-xl font-bold mt-2">
               Account List
             </div>
+            <div className="p-4">
+              <MotionButton
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setSelfTransferModal(true);
+                }}
+              >
+                Self transfer
+              </MotionButton>
+            </div>
             {accList.length > 0 ? (
-              <div className="grid lg:grid-cols-2 gap-4 p-4 max-h-[30vh] overflow-y-auto">
+              <div className="grid lg:grid-cols-2 gap-4 p-4 pt-0 max-h-[30vh] overflow-y-auto">
                 {accList?.map((acc, index) => {
                   const listColor =
                     ACC_LIST_COLORS[index % ACC_LIST_COLORS.length];

@@ -1,6 +1,4 @@
-import BaseLayout from "@/components/common/BaseLayout";
-import CardLayout from "@/components/common/CardLayout";
-import MotionButton from "@/components/motionUI/MotionButton";
+import { useEffect, useState } from "react";
 import {
   ChartContainer,
   ChartTooltip,
@@ -15,25 +13,27 @@ import {
   ItemHeader,
   ItemTitle,
 } from "@/components/ui/item";
-import { Pie, PieChart } from "recharts";
-import { formatCurrency, shortAmount } from "@/lib/currency";
 import {
   Field,
   FieldContent,
   FieldLabel,
   FieldTitle,
 } from "@/components/ui/field";
-import { ChevronRight, Receipt, Target, User, Wallet } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { CardContent } from "@/components/ui/card";
+import BaseLayout from "@/components/common/BaseLayout";
+import CardLayout from "@/components/common/CardLayout";
+import LoadingScreen from "@/components/common/LoadingScreen";
+import MotionButton from "@/components/motionUI/MotionButton";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { ChevronRight, Target, User, Wallet } from "lucide-react";
+import { Pie, PieChart } from "recharts";
 import { CHART_DYNAMIC_COLORS, LABEL_COLORS } from "@/config/colorConfig";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { formatCurrency, shortAmount } from "@/lib/currency";
 import { useNavigate } from "react-router";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDashboard } from "@/hooks/useDashboard";
-import LoadingScreen from "@/components/common/LoadingScreen";
+import { format } from "date-fns";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -82,8 +82,6 @@ const Dashboard = () => {
     setChartData(chartData);
     setLoading(false);
   };
-  console.log("chartConfig: ", chartConfig);
-  console.log("chartData: ", chartData);
   if (loading) {
     return <LoadingScreen />;
   }
@@ -206,7 +204,7 @@ const Dashboard = () => {
             <ScrollArea className="lg:h-90 flex flex-1">
               <ItemGroup className="flex flex-1 p-0 gap-2 my-auto">
                 {catOverview.map((category, index) => (
-                  <Item key={category.id}>
+                  <Item key={category.categoryId}>
                     <ItemContent className="flex flex-row justify-between items-start">
                       <ItemTitle className="max-lg:max-w-30 flex-2">
                         <div
@@ -252,7 +250,7 @@ const Dashboard = () => {
             </Item>
             {transacList.length > 0 ? (
               transacList.map((transaction, index) => (
-                <Item key={transaction.id} className="px-1 py-0 md:px-3">
+                <Item key={transaction._id} className="px-1 py-0 md:px-3">
                   <ItemContent className="flex flex-row gap-4">
                     {/* make it as common ui */}
                     <div

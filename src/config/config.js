@@ -30,6 +30,7 @@ const API_URL = {
   tranUrl: `${backendDomain}tran`,
   catUrl: `${backendDomain}cat`,
   dashboardUrl: `${backendDomain}dashboard`,
+  billUrl: `${backendDomain}bill`,
 };
 
 const TRANS_TYPE = {
@@ -54,6 +55,18 @@ const PAY_METHOD = {
   "net-bank": "Net Banking",
 };
 
+const BILL_TYPE = {
+  bill: "Bill",
+  subscription: "Subscription",
+};
+
+const DURATION_FREQUENCY = {
+  monthly: "Monthly",
+  quarterly: "Quarterly",
+  "half-yearly": "Half-Yearly",
+  yearly: "Yearly",
+};
+
 const LIST_LIMIT = 10;
 
 export {
@@ -64,4 +77,6 @@ export {
   YES_NO_SELECT,
   PAY_METHOD,
   LIST_LIMIT,
+  BILL_TYPE,
+  DURATION_FREQUENCY,
 };

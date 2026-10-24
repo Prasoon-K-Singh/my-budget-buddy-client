@@ -15,6 +15,15 @@ export async function tranAdd(payload) {
   }
 }
 
+export async function trnasferSelf(payload) {
+  try {
+    const response = await api.post("/self-transfer", payload);
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+}
+
 export async function tranList(payload) {
   try {
     const params = new URLSearchParams({

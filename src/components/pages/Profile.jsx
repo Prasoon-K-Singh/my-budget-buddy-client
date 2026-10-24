@@ -95,7 +95,7 @@ const Profile = () => {
         gender: info?.gender || "",
         currency: info?.currency || "",
       });
-      toast.success(data.message);
+      // toast.success(data.message);
     }
   }, [data, reset]);
   useEffect(() => {
@@ -139,8 +139,14 @@ const Profile = () => {
       gender: data.gender,
       currency: data.currency,
     };
-    await updateUser(updatedInfo);
-    setIsEditable(false);
+    const result = await updateUser(updatedInfo);
+    if (!result.success) {
+      toast.error(result.message, { id: "profile-update-error" });
+      return;
+    } else {
+      toast.success(result.message, { id: "profile-update-success" });
+      setIsEditable(false);
+    }
   };
   const handlePasswordUpdate = async (data) => {
     try {

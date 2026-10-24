@@ -14,6 +14,7 @@ import MotionButton from "@/components/motionUI/MotionButton";
 import { useAuth } from "@/hooks/useAuth";
 import { useForm } from "react-hook-form";
 import PasswordInput from "@/components/common/PasswordInput";
+import { toast } from "sonner";
 
 function LogIn() {
   const { handleLogin } = useAuth();
@@ -28,7 +29,12 @@ function LogIn() {
       username: data.username,
       password: data.password,
     };
-    await handleLogin(signinInfo);
+    const result = await handleLogin(signinInfo);
+    if (!result.success) {
+      toast.error(result.message, { id: "login-error" });
+    } else {
+      toast.success(result.message, { id: "login-success" });
+    }
   };
   return (
     <Card className="w-full min-w-85 shadow-2xl">

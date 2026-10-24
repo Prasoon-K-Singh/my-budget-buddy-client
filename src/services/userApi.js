@@ -29,7 +29,7 @@ export async function userUpdate(payload) {
     const response = await api.post(`update`, payload);
     return response.data;
   } catch (err) {
-    console.log("err: ", err);
+    throw err;
   }
 }
 

@@ -14,6 +14,7 @@ import MotionButton from "@/components/motionUI/MotionButton";
 import { useAuth } from "@/hooks/useAuth";
 import { useForm } from "react-hook-form";
 import PasswordInput from "@/components/common/PasswordInput";
+import { toast } from "sonner";
 
 function SignUp() {
   const { handleRegister } = useAuth();
@@ -35,10 +36,15 @@ function SignUp() {
       username: data.username,
       password: data.password,
     };
-    await handleRegister(signupInfo);
+    const result = await handleRegister(signupInfo);
+    if (!result.success) {
+      toast.error(result.message, { id: "signup-error" });
+    } else {
+      toast.success(result.message, { id: "signup-success" });
+    }
   };
   return (
-    <Card className="w-full min-w-85 shadow-2xl">
+    <Card className="w-full min-w-85 max-w-100 shadow-2xl">
       <CardHeader>
         <CardTitle>Welcome to My Budget Buddy</CardTitle>
         <CardDescription>

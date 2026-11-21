@@ -7,7 +7,7 @@ import ErrorPage from "@/components/pages/ErrorPage";
 import Profile from "@/components/pages/Profile";
 import Expenses from "@/components/pages/Expenses";
 import BudgetBuilder from "@/components/pages/BudgetBuilder";
-import GoalTracker from "@/components/pages/GoalTracker";
+import Bills from "@/components/pages/Bills";
 
 export const router = createBrowserRouter([
   {
@@ -44,10 +44,10 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/goals",
+        path: "/bills",
         element: (
           <Protected>
-            <GoalTracker />
+            <Bills />
           </Protected>
         ),
       },

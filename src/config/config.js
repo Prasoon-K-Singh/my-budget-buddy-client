@@ -14,8 +14,8 @@ const NAV_ITEM = [
     link: "/budgets",
   },
   {
-    title: "Goal Tracker",
-    link: "/goals",
+    title: "Bills & Subscriptions",
+    link: "/bills",
   },
   {
     title: "Profile",

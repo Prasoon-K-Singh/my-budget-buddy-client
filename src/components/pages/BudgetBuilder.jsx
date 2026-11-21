@@ -148,9 +148,12 @@ const BudgetBuilder = () => {
     return <LoadingScreen />;
   }
   return (
-    <BaseLayout title="Budget Planner" description="Plan smarter. Spend wiser.">
+    <BaseLayout
+      title="Budget Builder"
+      description="Manage your budget effectively with our Budget Builder."
+    >
       <div className="flex flex-col lg:grid lg:grid-cols-3 gap-8">
-        <CardLayout className="col-span-1 p-0 md:p-4">
+        <CardLayout className="col-span-1 px-0 md:px-4 py-4">
           <ItemGroup>
             <Item>
               <ItemHeader className="text:lg lg:text-xl font-bold">
@@ -226,7 +229,7 @@ const BudgetBuilder = () => {
                       setBudgetDailog(true);
                     }}
                   >
-                    Add Budget
+                    Budget Config
                   </MotionButton>
                 </ItemActions>
               </ItemHeader>
@@ -304,9 +307,20 @@ const BudgetBuilder = () => {
               Tips
             </ItemTitle>
             <ItemDescription className="mx-2.5">
-              You've spent 15% more on Food compared to last month.
+              AI powered insights to help you manage your budget effectively.
+              Get personalized recommendations based on your spending habits and
+              financial goals.
             </ItemDescription>
-            <MotionButton variant="link" size="lg" className="w-fit">
+            <MotionButton
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                toast.info("Insights feature is coming soon!", {
+                  id: "insights-coming-soon",
+                });
+              }}
+              className="w-fit mt-2 mx-2.5"
+            >
               View Insights
             </MotionButton>
           </ItemContent>

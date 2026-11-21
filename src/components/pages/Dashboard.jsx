@@ -82,6 +82,45 @@ const Dashboard = () => {
     setChartData(chartData);
     setLoading(false);
   };
+  function SpendingChange({ change, type, currentAmount }) {
+    if (currentAmount === 0) {
+      return (
+        <ItemTitle className="text-muted-foreground">
+          No {type} this month
+        </ItemTitle>
+      );
+    }
+
+    if (!change || change.direction === "same") {
+      return (
+        <ItemTitle className="text-muted-foreground">
+          No change from last month
+        </ItemTitle>
+      );
+    }
+
+    const isIncrease = change.direction === "increase";
+    const percentage = Number(change.percentage || 0);
+
+    const isPositive = type === "Credit" ? isIncrease : !isIncrease;
+
+    const colorClass = isPositive ? "text-success" : "text-destructive";
+
+    const sign = isIncrease ? "+" : "-";
+    const comparisonText = isIncrease
+      ? "more than last month"
+      : "less than last month";
+
+    return (
+      <ItemTitle className="text-muted-foreground">
+        <span className={colorClass}>
+          {sign}
+          {percentage.toFixed(2)}%
+        </span>{" "}
+        {comparisonText}
+      </ItemTitle>
+    );
+  }
   if (loading) {
     return <LoadingScreen />;
   }
@@ -112,21 +151,11 @@ const Dashboard = () => {
             <ItemTitle className="pt-1 text-2xl text-success">
               {formatCurrency(overallSpending?.currentMonth?.credit || 0)}
             </ItemTitle>
-            {overallSpending?.creditChange?.direction === "increase" ? (
-              <ItemTitle className="text-muted-foreground">
-                <span className="text-success">
-                  +{overallSpending?.creditChange?.percentage || 0}%{" "}
-                </span>
-                more then last month
-              </ItemTitle>
-            ) : overallSpending?.creditChange?.direction === "decrease" ? (
-              <ItemTitle className="text-muted-foreground">
-                <span className="text-destructive">
-                  +{overallSpending?.creditChange?.percentage || 0}%{" "}
-                </span>
-                more then last month
-              </ItemTitle>
-            ) : null}
+            <SpendingChange
+              type="Credit"
+              currentAmount={overallSpending?.currentMonth?.credit || 0}
+              change={overallSpending?.creditChange}
+            />
           </Item>
         </CardLayout>
         <CardLayout className="bg-destructive/10 border-destructive/30">
@@ -137,21 +166,11 @@ const Dashboard = () => {
             <ItemTitle className="pt-1 text-2xl text-destructive">
               {formatCurrency(overallSpending?.currentMonth?.debit || 0)}
             </ItemTitle>
-            {overallSpending?.creditChange?.direction === "decrease" ? (
-              <ItemTitle className="text-muted-foreground">
-                <span className="text-success">
-                  +{overallSpending?.debitChange?.percentage || 0}%{" "}
-                </span>
-                more then last month
-              </ItemTitle>
-            ) : overallSpending?.creditChange?.direction === "increase" ? (
-              <ItemTitle className="text-muted-foreground">
-                <span className="text-destructive">
-                  +{overallSpending?.debitChange?.percentage || 0}%{" "}
-                </span>
-                more then last month
-              </ItemTitle>
-            ) : null}
+            <SpendingChange
+              type="Debit"
+              currentAmount={overallSpending?.currentMonth?.debit || 0}
+              change={overallSpending?.debitChange}
+            />
           </Item>
         </CardLayout>
         <CardLayout className="bg-ring/10 border-ring/30">

@@ -769,7 +769,9 @@ const Expenses = () => {
                   <EmptyContent>
                     <EmptyTitle>No Transaction found</EmptyTitle>
                     <EmptyDescription>
-                      Add tranasaction to get started
+                      No transaction found for the selected date range. Please
+                      adjust your filters or add new transactions to see them
+                      here.
                     </EmptyDescription>
                   </EmptyContent>
                 </Empty>

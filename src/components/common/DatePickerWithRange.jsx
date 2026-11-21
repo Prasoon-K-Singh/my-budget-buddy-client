@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
@@ -17,9 +18,10 @@ const DatePickerWithRange = ({
   setDate,
   disabledBeforeDate = oneYearAgo,
 }) => {
+  const [open, setOpen] = useState(false);
   return (
     <Field className="w-full max-w-106">
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <MotionButton
             variant="secondary"
@@ -43,6 +45,15 @@ const DatePickerWithRange = ({
           </MotionButton>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
+          <div className="flex justify-end border-b p-1">
+            <MotionButton
+              variant="secondary"
+              size="sm"
+              onClick={() => setOpen(false)}
+            >
+              Close
+            </MotionButton>
+          </div>
           <Calendar
             mode="range"
             defaultMonth={date?.from}

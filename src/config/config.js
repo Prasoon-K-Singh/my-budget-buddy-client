@@ -1,4 +1,4 @@
-const backendDomain = "http://localhost:3000/api/";
+const backendDomain = import.meta.env.VITE_API_URL;
 
 const NAV_ITEM = [
   {
@@ -24,13 +24,13 @@ const NAV_ITEM = [
 ];
 
 const API_URL = {
-  authUrl: `${backendDomain}auth`,
-  userUrl: `${backendDomain}user`,
-  accUrl: `${backendDomain}acc`,
-  tranUrl: `${backendDomain}tran`,
-  catUrl: `${backendDomain}cat`,
-  dashboardUrl: `${backendDomain}dashboard`,
-  billUrl: `${backendDomain}bill`,
+  authUrl: `${backendDomain}/auth`,
+  userUrl: `${backendDomain}/user`,
+  accUrl: `${backendDomain}/acc`,
+  tranUrl: `${backendDomain}/tran`,
+  catUrl: `${backendDomain}/cat`,
+  dashboardUrl: `${backendDomain}/dashboard`,
+  billUrl: `${backendDomain}/bill`,
 };
 
 const TRANS_TYPE = {

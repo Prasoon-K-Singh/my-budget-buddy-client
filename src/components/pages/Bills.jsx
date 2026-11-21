@@ -40,7 +40,7 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/currency";
 import { format } from "date-fns";
 
-const GoalTracker = () => {
+const Bills = () => {
   const [payments, setPayments] = useState([]);
   const [markingPaid, setMarkingPaid] = useState(null);
   const [paymentId, setPaymentId] = useState(null);
@@ -514,4 +514,4 @@ const GoalTracker = () => {
   );
 };
 
-export default GoalTracker;
+export default Bills;

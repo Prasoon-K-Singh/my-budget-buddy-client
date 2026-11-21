@@ -355,18 +355,18 @@ const Dashboard = () => {
             <Field>
               <FieldContent className="h-full justify-between gap-3">
                 <FieldLabel className="text:lg lg:text-xl font-bold text-destructive">
-                  Goals
+                  Bills & Subscriptions
                 </FieldLabel>
                 <FieldTitle className="text-muted-foreground pt-1">
-                  Configure Goals
+                  Configure Bills and Subscriptions
                 </FieldTitle>
                 <div>
                   <MotionButton
-                    onClick={() => navigate("/goals")}
+                    onClick={() => navigate("/bills")}
                     variant="outline"
                     size="lg"
                   >
-                    View Goals
+                    View Bills
                   </MotionButton>
                 </div>
               </FieldContent>

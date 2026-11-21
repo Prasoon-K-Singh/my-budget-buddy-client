@@ -1257,20 +1257,22 @@ const Expenses = () => {
                 You can add new account or modify your existing one
               </DialogDescription>
             </DialogHeader>
-            <div className="text-xl md:text-xl font-bold mt-2">
+            <div className="text-xl md:text-xl font-bold mt-2 mb-4">
               Account List
             </div>
-            <div className="p-4">
-              <MotionButton
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setSelfTransferModal(true);
-                }}
-              >
-                Self transfer
-              </MotionButton>
-            </div>
+            {accList.length > 1 ? (
+              <div className="p-4 pt-0">
+                <MotionButton
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setSelfTransferModal(true);
+                  }}
+                >
+                  Self transfer
+                </MotionButton>
+              </div>
+            ) : null}
             {accList.length > 0 ? (
               <div className="grid lg:grid-cols-2 gap-4 p-4 pt-0 max-h-[30vh] overflow-y-auto">
                 {accList?.map((acc, index) => {

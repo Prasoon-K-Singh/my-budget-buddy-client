@@ -300,15 +300,12 @@ const GoalTracker = () => {
         </div>
         <MotionButton
           size="sm"
-          className="shrink-0"
+          className="shrink-0 hidden sm:flex"
           disabled={loading}
           onClick={() => onMarkPaid(payment)}
         >
           <Check className="mr-1.5 h-3.5 w-3.5" />
-          <span className="hidden sm:inline">
-            {loading ? "Updating..." : "Mark Paid"}
-          </span>
-          <span className="sm:hidden">{loading ? "..." : "Paid"}</span>
+          <span>{loading ? "Updating..." : "Mark Paid"}</span>
         </MotionButton>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -321,6 +318,13 @@ const GoalTracker = () => {
             </MotionButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="sm:hidden"
+              onClick={() => onMarkPaid(payment)}
+            >
+              Mark Paid
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="sm:hidden" />
             <DropdownMenuItem
               onClick={() => {
                 setShowAddDialog(true);

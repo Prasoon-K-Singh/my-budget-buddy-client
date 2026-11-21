@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { format, isValid } from "date-fns";
-
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -20,14 +19,19 @@ const DateInput = ({
   maxDate,
   ...props
 }) => {
+  const isValidDate = value instanceof Date && isValid(value);
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [calendarDate, setCalendarDate] = useState(value);
+  const [calendarDate, setCalendarDate] = useState(
+    isValidDate ? value : undefined,
+  );
 
   useEffect(() => {
-    setCalendarDate(value);
+    const validDate = value instanceof Date && isValid(value);
 
-    if (value instanceof Date && isValid(value)) {
+    setCalendarDate(validDate ? value : undefined);
+
+    if (validDate) {
       setInputValue(format(value, "dd/MM/yyyy"));
     } else {
       setInputValue("");

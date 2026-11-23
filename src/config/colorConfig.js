@@ -39,6 +39,19 @@ export const LABEL_COLORS = [
   { progress: "bg-rose-500", track: "bg-rose-500/20" },
 ];
 
+export const TEXT_COLORS = [
+  { text: "text-red-500" },
+  { text: "text-purple-500" },
+  { text: "text-yellow-500" },
+  { text: "text-pink-500" },
+  { text: "text-green-500" },
+  { text: "text-orange-500" },
+  { text: "text-teal-500" },
+  { text: "text-cyan-500" },
+  { text: "text-indigo-500" },
+  { text: "text-rose-500" },
+];
+
 export const CHART_DYNAMIC_COLORS = [
   "bg-chart-1",
   "bg-chart-2",

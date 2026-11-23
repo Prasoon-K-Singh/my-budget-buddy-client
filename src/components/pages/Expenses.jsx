@@ -448,6 +448,7 @@ const Expenses = () => {
               variant="secondary"
               size="filter"
               buttonConfig="dropdown"
+              className="bg-primary/10 border-primary/30 text-primary"
             >
               <span>
                 {accountFilter === "all-acc"
@@ -483,6 +484,7 @@ const Expenses = () => {
               variant="secondary"
               size="filter"
               buttonConfig="dropdown"
+              className="bg-primary/10 border-primary/30 text-primary"
             >
               <span>
                 {categoryFilter === "all-cat"
@@ -518,6 +520,7 @@ const Expenses = () => {
               variant="secondary"
               size="filter"
               buttonConfig="dropdown"
+              className="bg-primary/10 border-primary/30 text-primary"
             >
               <span>
                 {methodFilter === "all-method"
@@ -553,6 +556,7 @@ const Expenses = () => {
               variant="secondary"
               size="filter"
               buttonConfig="dropdown"
+              className="bg-primary/10 border-primary/30 text-primary"
             >
               <span>
                 {typeFilter === "all-type"

@@ -27,7 +27,7 @@ const DatePickerWithRange = ({
             variant="secondary"
             buttonConfig="dropdown"
             size="filter"
-            className="justify-none gap-4"
+            className="bg-primary/10 border-primary/30 text-primary justify-none gap-4"
           >
             <CalendarIcon className="w-8 h-8" />
             {date?.from ? (

@@ -439,6 +439,10 @@ const Bills = () => {
       </div>
     );
   };
+
+  if (billLoading) {
+    return <LoadingScreen />;
+  }
   return (
     <BaseLayout
       title="Bills & Subscriptions"

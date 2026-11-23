@@ -28,7 +28,11 @@ import MotionButton from "@/components/motionUI/MotionButton";
 import { toast } from "sonner";
 import { ChevronRight, Target, User, Wallet } from "lucide-react";
 import { Pie, PieChart } from "recharts";
-import { CHART_DYNAMIC_COLORS, LABEL_COLORS } from "@/config/colorConfig";
+import {
+  CHART_DYNAMIC_COLORS,
+  LABEL_COLORS,
+  TEXT_COLORS,
+} from "@/config/colorConfig";
 import { cn } from "@/lib/utils";
 import { formatCurrency, shortAmount } from "@/lib/currency";
 import { useNavigate } from "react-router";
@@ -200,6 +204,8 @@ const Dashboard = () => {
                 <PieChart>
                   <ChartTooltip
                     cursor={false}
+                    position={{ x: 20, y: 20 }}
+                    allowEscapeViewBox={{ x: false, y: false }}
                     content={
                       <ChartTooltipContent indicator="dot" hideLabel={false} />
                     }
@@ -239,7 +245,7 @@ const Dashboard = () => {
                       <ItemTitle className="flex-1 justify-end">
                         {category.expensePercentage}%
                       </ItemTitle>
-                      <ItemTitle className="flex-1 justify-end">
+                      <ItemTitle className="hidden sm:flex flex-1 justify-end">
                         {formatCurrency(category.expense)}
                       </ItemTitle>
                     </ItemContent>
@@ -275,10 +281,15 @@ const Dashboard = () => {
                     <div
                       className={cn(
                         "w-8 h-8 md:w-12 md:h-12 flex justify-between items-center rounded-full ",
-                        LABEL_COLORS[index % LABEL_COLORS.length].progress,
+                        LABEL_COLORS[index % LABEL_COLORS.length].track,
                       )}
                     >
-                      <span className="flex-1 text-2xl md:text-3xl text-center font-bold">
+                      <span
+                        className={cn(
+                          "flex-1 text-2xl md:text-3xl text-center font-bold",
+                          TEXT_COLORS[index % TEXT_COLORS.length].text,
+                        )}
+                      >
                         {transaction?.merchantName?.charAt(0) || "M"}
                       </span>
                     </div>

@@ -34,7 +34,7 @@ import LoadingScreen from "@/components/common/LoadingScreen";
 import MotionButton from "@/components/motionUI/MotionButton";
 import { toast } from "sonner";
 import { Calendar, Calendar1, ChartBar, Clock } from "lucide-react";
-import { LABEL_COLORS } from "@/config/colorConfig";
+import { LABEL_COLORS, TEXT_COLORS } from "@/config/colorConfig";
 import { useBill } from "@/hooks/useBill";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/currency";
@@ -248,10 +248,15 @@ const Bills = () => {
         <div
           className={cn(
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-semibold ",
-            LABEL_COLORS[index % LABEL_COLORS.length].progress,
+            LABEL_COLORS[index % LABEL_COLORS.length].track,
           )}
         >
-          <span className="flex-1 text-2xl text-center font-bold">
+          <span
+            className={cn(
+              "flex-1 text-2xl text-center font-bold",
+              TEXT_COLORS[index % TEXT_COLORS.length].text,
+            )}
+          >
             {payment.name.charAt(0).toUpperCase()}
           </span>
         </div>

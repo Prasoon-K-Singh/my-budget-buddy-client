@@ -41,7 +41,7 @@ import LoadingScreen from "@/components/common/LoadingScreen";
 import ComboboxCreatable from "@/components/common/ComboboxCreatable";
 import MotionButton from "@/components/motionUI/MotionButton";
 import { toast } from "sonner";
-import { LABEL_COLORS } from "@/config/colorConfig";
+import { LABEL_COLORS, TEXT_COLORS } from "@/config/colorConfig";
 import { STATUS, YES_NO_SELECT } from "@/config/config";
 import { useCat } from "@/hooks/useCat";
 import { cn } from "@/lib/utils";
@@ -242,10 +242,15 @@ const BudgetBuilder = () => {
                     <div
                       className={cn(
                         "w-8 h-8 md:w-12 md:h-12 flex justify-between items-center rounded-full ",
-                        LABEL_COLORS[index % LABEL_COLORS.length].progress,
+                        LABEL_COLORS[index % LABEL_COLORS.length].track,
                       )}
                     >
-                      <span className="flex-1 text-2xl md:text-3xl text-center font-bold">
+                      <span
+                        className={cn(
+                          "flex-1 text-2xl md:text-3xl text-center font-bold ",
+                          TEXT_COLORS[index % TEXT_COLORS.length].text,
+                        )}
+                      >
                         {category?.categoryName?.charAt(0) || "C"}
                       </span>
                     </div>
